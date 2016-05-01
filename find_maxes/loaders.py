@@ -39,5 +39,5 @@ def load_trained_net(model_prototxt = None, model_weights = None):
     
 def load_imagenet_mean():
     imagenet_mean = np.load(caffe_root + 'python/caffe/imagenet/ilsvrc_2012_mean.npy')
-    imagenet_mean = imagenet_mean[:, 14:14+224, 14:14+224]    # (3,256,256) -> (3,227,227) Crop to center 227x227 section
+    imagenet_mean = imagenet_mean[:, 14:14+227, 14:14+227]    # (3,256,256) -> (3,227,227) Crop to center 227x227 section
     return imagenet_mean
