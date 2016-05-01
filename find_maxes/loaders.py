@@ -3,7 +3,7 @@
 from pylab import *
 
 # Make sure that caffe is on the python path:
-caffe_root = '../../'  # this file is expected to be in {caffe_root}/experiments/something
+caffe_root = '/home/ubuntu/caffe/'  # this file is expected to be in {caffe_root}/experiments/something
 import sys
 loadpath = caffe_root + 'python_cpu'
 print '= = = CAFFE LOADER: LOADING CPU VERSION from path: %s = = =' % loadpath
@@ -39,5 +39,5 @@ def load_trained_net(model_prototxt = None, model_weights = None):
     
 def load_imagenet_mean():
     imagenet_mean = np.load(caffe_root + 'python/caffe/imagenet/ilsvrc_2012_mean.npy')
-    imagenet_mean = imagenet_mean[:, 14:14+227, 14:14+227]    # (3,256,256) -> (3,227,227) Crop to center 227x227 section
+    imagenet_mean = imagenet_mean[:, 14:14+224, 14:14+224]    # (3,256,256) -> (3,227,227) Crop to center 227x227 section
     return imagenet_mean
