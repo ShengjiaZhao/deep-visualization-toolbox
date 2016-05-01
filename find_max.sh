@@ -1,0 +1,1 @@
+python find_maxes/find_max_acts.py --N 9 --gpu models/caffenet-yos/caffenet-yos-deploy.prototxt models/caffenet-yos/caffenet-yos-weights /home/ubuntu/sdf/images /home/ubuntu/sdf/database_list max_out >stdout.out 2>stderr.err </dev/null &
