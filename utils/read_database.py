@@ -32,7 +32,7 @@ if __name__ == '__main__':
     labelfile.close()
     listfile = open(listfile_path, 'w')
     for index, cur_dir in zip(range(0, len(dirs)), dirs):
-        print("Processing " + cur_dir)
+        print(str(index) + ": Processing " + cur_dir)
         files = os.listdir(database_path + '/' + cur_dir)
         for cur_file in files:
             if os.path.isfile(database_path + '/' + cur_dir + '/' + cur_file):
