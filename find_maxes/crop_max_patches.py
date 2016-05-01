@@ -1,5 +1,9 @@
 #! /usr/bin/env python
 
+import matplotlib
+matplotlib.use('Agg')
+
+
 import argparse
 import ipdb as pdb
 import cPickle as pickle
@@ -12,8 +16,6 @@ from max_tracker import output_max_patches
 # max_out models/caffenet-yos/caffenet-yos-deploy.prototxt models/caffenet-yos/caffenet-yos-weights
 # /home/ubuntu/sdf/images /home/ubuntu/sdf/database_list /home/ubuntu/sdf/results conv4
 
-import matplotlib
-matplotlib.use('Agg')
 
 def main():
     parser = argparse.ArgumentParser(description='Loads a pickled NetMaxTracker and outputs one or more of {the patches of the image, a deconv patch, a backprop patch} associated with the maxes.')
