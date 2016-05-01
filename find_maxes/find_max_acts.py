@@ -8,7 +8,10 @@ from loaders import load_imagenet_mean, load_labels, caffe
 from jby_misc import WithTimer
 from max_tracker import scan_images_for_maxes
 
-
+# --N 9 --gpu models/caffenet-yos/caffenet-yos-deploy.prototxt models/caffenet-yos/caffenet-yos-weights /home/ubuntu/sdf/images /home/ubuntu/sdf/database_list max_out
+# --N 9 --gpu models/bvlc-googlenet/bvlc-googlenet-deploy.prototxt models/bvlc-googlenet/bvlc-googlenet.caffemodel /home/ubuntu/sdf/images /home/ubuntu/sdf/database_list max_out
+import matplotlib
+matplotlib.use('Agg')
 
 def main():
     parser = argparse.ArgumentParser(description='Finds images in a training set that cause max activation for a network; saves results in a pickled NetMaxTracker.')

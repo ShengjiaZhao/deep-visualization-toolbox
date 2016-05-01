@@ -8,7 +8,12 @@ from loaders import load_imagenet_mean, load_labels, caffe
 from jby_misc import WithTimer
 from max_tracker import output_max_patches
 
+# --N 9 --do-maxes --do-deconv --do-deconv-norm --do-backprop --do-backprop-norm --do-info
+# max_out models/caffenet-yos/caffenet-yos-deploy.prototxt models/caffenet-yos/caffenet-yos-weights
+# /home/ubuntu/sdf/images /home/ubuntu/sdf/database_list /home/ubuntu/sdf/results conv4
 
+import matplotlib
+matplotlib.use('Agg')
 
 def main():
     parser = argparse.ArgumentParser(description='Loads a pickled NetMaxTracker and outputs one or more of {the patches of the image, a deconv patch, a backprop patch} associated with the maxes.')
