@@ -74,6 +74,8 @@ if __name__ == '__main__':
 
     iter_count = 0
     for path, label in zip(path_list, label_list):
+        if args.num and iter_count >= args.num:
+            break
         fullpath = os.path.join(args.datadir, path)
         if not os.path.isfile(fullpath):
             print("Error: file " + fullpath + " not found")
