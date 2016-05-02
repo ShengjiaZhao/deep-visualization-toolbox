@@ -73,7 +73,7 @@ if __name__ == '__main__':
         result_array[layer] = layer_result
 
     iter_count = 0
-    for path in zip(path_list):
+    for path in path_list:
         fullpath = os.path.join(args.datadir, path)
         if not os.path.isfile(fullpath):
             print("Error: file " + fullpath + " not found")
