@@ -93,7 +93,7 @@ if __name__ == '__main__':
             if len(layer_shape) == 4:
                 result_array[layer]['activation'][iter_count, :] = np.amax(net.blobs[layer].data, (0, 2, 3))
             elif len(layer_shape) == 2:
-                result_array[layer]['activation'][iter_count, :] = net.blobs[layer].data[0, :]
+                result_array[layer]['activation'][iter_count, :] = np.amax(net.blobs[layer].data, 0)
         # print(str((time.time() - start_time)*1000) + "ms for copy")
         # sys.stdout.flush()
         avg_time += time.time() - start_time
