@@ -67,9 +67,9 @@ if __name__ == '__main__':
         layer_shape = net.blobs[layer].data.shape
         if len(layer_shape) == 4 or len(layer_shape) == 2:
             num_images = len(path_list)
-            if args.num is not None and args.num < num_images:
-                num_images = args.num
-            layer_result['activation'] = np.ndarray((num_images, layer_shape[1]), dtype=float, order='C')
+            # if args.num is not None and args.num < num_images:
+            #     num_images = args.num
+            layer_result['activation'] = np.ndarray((num_images, layer_shape[1]), dtype=float, order='F')
         else:
             print("Unknown layer shape")
             exit(-1)
@@ -97,7 +97,7 @@ if __name__ == '__main__':
             elif len(layer_shape) == 2:
                 result_array[layer]['activation'][iter_count:] = net.blobs[layer].data[0:]
         elapsed_time = (time.time() - cur_time) * 1000
-        print("Copy: Taking " + str(total_time) + "ms")
+        print("Copy: Taking " + str(elapsed_time) + "ms")
         iter_count += 1
         if iter_count % 100 == 0:
             print("Processing " + str(iter_count) + "-th image")
