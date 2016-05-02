@@ -85,6 +85,7 @@ if __name__ == '__main__':
         net.predict([im], oversample=False)   # Just take center crop
         total_time = (time.time() - cur_time) * 1000
         print("Taking " + str(total_time) + "ms")
+        sys.stdout.flush()
         for layer in layers:
             layer_shape = net.blobs[layer].data.shape
             if len(layer_shape) == 4:
