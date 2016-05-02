@@ -73,11 +73,13 @@ if __name__ == '__main__':
         result_array[layer] = layer_result
 
     iter_count = 0
+    avg_time = 0.0
     for path in path_list:
         fullpath = os.path.join(args.datadir, path)
         if not os.path.isfile(fullpath):
             print("Error: file " + fullpath + " not found")
             sys.stdout.flush()
+        start_time = time.time()
         im = caffe.io.load_image(fullpath)
         net.predict([im], oversample=False)   # Just take center crop
         for layer in layers:
@@ -86,9 +88,10 @@ if __name__ == '__main__':
                 result_array[layer]['activation'][iter_count, :] = np.amax(net.blobs[layer].data, (0, 2, 3))
             elif len(layer_shape) == 2:
                 result_array[layer]['activation'][iter_count, :] = net.blobs[layer].data[0, :]
+        avg_time += time.time() - start_time
         iter_count += 1
         if iter_count % 100 == 0:
-            print("Processing " + str(iter_count) + "-th image")
+            print("Processing " + str(iter_count) + "-th image, average time: " + str(avg_time * 10) + "ms")
             sys.stdout.flush()
 
     print("Finished, saving to file")
