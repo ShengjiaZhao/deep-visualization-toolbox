@@ -1,11 +1,10 @@
 __author__ = 'shengjia'
 
 
-from find_maxes import loaders
 import os
 import argparse
 import numpy as np
-from loaders import load_imagenet_mean, load_labels, caffe
+from find_maxes.loaders import load_imagenet_mean, load_labels, caffe
 
 def read_filelist(filename, max_size):
     path_list = []
