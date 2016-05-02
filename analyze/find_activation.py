@@ -87,7 +87,8 @@ if __name__ == '__main__':
         im = caffe.io.load_image(fullpath)
         net.predict([im], oversample=False)   # Just take center crop
         total_time = (time.time() - cur_time) * 1000
-        print("Taking " + str(total_time) + "ms")
+        cur_time = time.time()
+        print("Net: Taking " + str(total_time) + "ms")
         sys.stdout.flush()
         for layer in layers:
             layer_shape = net.blobs[layer].data.shape
@@ -95,6 +96,8 @@ if __name__ == '__main__':
                 result_array[layer]['activation'][iter_count:] = np.amax(net.blobs[layer].data, (0, 2, 3))
             elif len(layer_shape) == 2:
                 result_array[layer]['activation'][iter_count:] = net.blobs[layer].data[0:]
+        elapsed_time = (time.time() - cur_time) * 1000
+        print("Copy: Taking " + str(total_time) + "ms")
         iter_count += 1
         if iter_count % 100 == 0:
             print("Processing " + str(iter_count) + "-th image")
