@@ -50,6 +50,7 @@ if __name__ == '__main__':
 
     layers = args.layers.split(',')
     print("Recording layers " + str(layers))
+    sys.stdout.flush()
 
     imagenet_mean = load_imagenet_mean()
     net = caffe.Classifier(args.net_prototxt, args.net_weights,
@@ -68,6 +69,7 @@ if __name__ == '__main__':
             layer_result['activation'] = np.ndarray((len(path_list), layer_shape[1]), dtype=float)
         else:
             print("Unknown layer shape")
+            exit(-1)
         result_array[layer] = layer_result
 
     iter_count = 0
@@ -75,6 +77,7 @@ if __name__ == '__main__':
         fullpath = os.path.join(args.datadir, path)
         if not os.path.isfile(fullpath):
             print("Error: file " + fullpath + " not found")
+            sys.stdout.flush()
         im = caffe.io.load_image(fullpath)
         net.predict([im], oversample=False)   # Just take center crop
         for layer in layers:
@@ -82,6 +85,7 @@ if __name__ == '__main__':
         iter_count += 1
         if iter_count % 1000 == 0:
             print("Processing " + str(iter_count) + "-th image")
+            sys.stdout.flush()
 
     print("Finished, saving to file")
     if not os.path.isdir(args.outdir):
