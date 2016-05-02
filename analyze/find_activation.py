@@ -66,7 +66,10 @@ if __name__ == '__main__':
         layer_result = {'name': layer}
         layer_shape = net.blobs[layer].data.shape
         if len(layer_shape) == 4 or len(layer_shape) == 2:
-            layer_result['activation'] = np.ndarray((len(path_list), layer_shape[1]), dtype=float, order='C')
+            num_images = len(path_list)
+            if args.num is not None and args.num < num_images:
+                num_images = args.num
+            layer_result['activation'] = np.ndarray((num_images, layer_shape[1]), dtype=float, order='C')
         else:
             print("Unknown layer shape")
             exit(-1)
