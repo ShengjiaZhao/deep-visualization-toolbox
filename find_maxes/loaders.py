@@ -1,9 +1,17 @@
 #! /usr/bin/env python
 
-from pylab import *
 
+
+REMOTE_USE = False
 # Make sure that caffe is on the python path:
-caffe_root = '/home/ubuntu/caffe/'  # this file is expected to be in {caffe_root}/experiments/something
+if REMOTE_USE:
+    caffe_root = '/home/ubuntu/caffe/'  # this file is expected to be in {caffe_root}/experiments/something
+    import matplotlib
+    matplotlib.use('Agg')
+else:
+    caffe_root = '/home/shengjia/caffe/'
+
+from pylab import *
 import sys
 loadpath = caffe_root + 'python_cpu'
 print '= = = CAFFE LOADER: LOADING CPU VERSION from path: %s = = =' % loadpath
