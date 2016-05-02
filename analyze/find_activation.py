@@ -4,6 +4,8 @@ __author__ = 'shengjia'
 import os
 import argparse
 import numpy as np
+import sys
+sys.path.insert(0, '..')
 from find_maxes.loaders import load_imagenet_mean, load_labels, caffe
 
 def read_filelist(filename, max_size):
