@@ -93,9 +93,9 @@ if __name__ == '__main__':
         for layer in layers:
             layer_shape = net.blobs[layer].data.shape
             if len(layer_shape) == 4:
-                result_array[layer]['activation'][iter_count:] = np.amax(net.blobs[layer].data, (0, 2, 3))
+                result_array[layer]['activation'][iter_count, :] = np.amax(net.blobs[layer].data, (0, 2, 3))
             elif len(layer_shape) == 2:
-                result_array[layer]['activation'][iter_count:] = net.blobs[layer].data[0:]
+                result_array[layer]['activation'][iter_count, :] = net.blobs[layer].data[0:]
         elapsed_time = (time.time() - cur_time) * 1000
         print("Copy: Taking " + str(elapsed_time) + "ms")
         iter_count += 1
