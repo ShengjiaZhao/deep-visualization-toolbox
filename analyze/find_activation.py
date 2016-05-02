@@ -10,11 +10,10 @@ sys.path.insert(0, '..')
 from find_maxes.loaders import load_imagenet_mean, load_labels, caffe
 
 
-def read_filelist(filename, count):
+def read_filelist(filename, read_num):
     path_list = []
     label_list = []
     infile = open(filename)
-    count = 0
     while True:
         content = infile.readline().split()
         if len(content) == 0:
@@ -25,8 +24,8 @@ def read_filelist(filename, count):
         else:
             print("Error: received " + str(len(content)) + " items in a line")
             assert False
-    if count is not None:
-        path_list = random.sample(path_list, count)
+    if read_num is not None:
+        path_list = random.sample(path_list, read_num)
     return path_list
 
 
