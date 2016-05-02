@@ -66,7 +66,7 @@ if __name__ == '__main__':
         layer_result = {'name': layer}
         layer_shape = net.blobs[layer].data.shape
         if len(layer_shape) == 4 or len(layer_shape) == 2:
-            layer_result['activation'] = np.ndarray((len(path_list), layer_shape[1]), dtype=float)
+            layer_result['activation'] = np.ndarray((len(path_list), layer_shape[1]), dtype=float, order='C')
         else:
             print("Unknown layer shape")
             exit(-1)
@@ -89,9 +89,9 @@ if __name__ == '__main__':
         for layer in layers:
             layer_shape = net.blobs[layer].data.shape
             if len(layer_shape) == 4:
-                result_array[layer]['activation'][iter_count:] = net.blobs[layer].data.max(3).max(2).max(0)
+                result_array[layer]['activation'][iter_count:] = np.amax(net.blobs[layer].data, (0, 2, 3))
             elif len(layer_shape) == 2:
-                result_array[layer]['activation'][iter_count:] = net.blobs[layer].data.max(0)
+                result_array[layer]['activation'][iter_count:] = net.blobs[layer].data[0:]
         iter_count += 1
         if iter_count % 100 == 0:
             print("Processing " + str(iter_count) + "-th image")
