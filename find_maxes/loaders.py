@@ -2,7 +2,7 @@
 
 
 
-REMOTE_USE = False
+REMOTE_USE = True
 # Make sure that caffe is on the python path:
 if REMOTE_USE:
     caffe_root = '/home/ubuntu/caffe/'  # this file is expected to be in {caffe_root}/experiments/something
