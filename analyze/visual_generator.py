@@ -1,10 +1,8 @@
 __author__ = 'shengjia'
 
-import math
 import numpy as np
 from matplotlib import pyplot as plt
-import time
-import os
+import os, random, time, math
 from scipy import misc
 
 
@@ -15,7 +13,60 @@ class VisualGenerator:
         self.slot_count = 50
         self.display_size = [1080, 1920]
 
-    def visualize(self, nodes):
+    def visualize_collage(self, nodes, include_deconv=False):
+        image_width = (self.display_size[0] + self.display_size[1]) / math.sqrt(len(nodes))
+        if image_width > min(self.display_size) / 2:
+            image_width = min(self.display_size) / 2
+        if image_width < 100:
+            image_width = 100
+        image_width = int(image_width)
+        print(image_width)
+        canvas = np.zeros(self.display_size + [3], np.uint8)
+        for node in nodes:
+            if include_deconv:
+                plot_x = int(math.floor(node['coord'][0] * (self.display_size[1] - image_width * 2)))
+            else:
+                plot_x = int(math.floor(node['coord'][0] * (self.display_size[1] - image_width)))
+            plot_y = int(math.floor(node['coord'][1] * (self.display_size[0] - image_width)))
+
+            max_path = os.path.join(self.image_folder, node['layer'],
+                                    'unit_%.4d' % node['index'], 'maxim_000.png')
+            if not os.path.isfile(max_path):
+                print("Error: " + max_path + " do not exist")
+            else:
+                canvas[plot_y:plot_y+image_width,
+                        plot_x:plot_x+image_width, :] = \
+                        misc.imresize(misc.imread(max_path), (image_width, image_width))
+
+            if include_deconv:
+                deconv_path = os.path.join(self.image_folder, node['layer'],
+                           'unit_%.4d' % node['index'], 'deconv_000.png')
+                if not os.path.isfile(deconv_path):
+                    print("Error: " + deconv_path + " do not exist")
+                else:
+                    canvas[plot_y:plot_y+image_width,
+                            plot_x+image_width:plot_x+image_width*2, :] = \
+                            misc.imresize(misc.imread(deconv_path), (image_width, image_width))
+
+            if include_deconv:
+                border_width = image_width*2
+            else:
+                border_width = image_width
+            thickness = 2
+            canvas[plot_y:plot_y+image_width, plot_x:plot_x+thickness, :] = \
+                np.zeros((image_width, thickness, 3), np.uint8)
+            canvas[plot_y:plot_y+image_width, plot_x+border_width-thickness:plot_x+border_width, :] = \
+                np.zeros((image_width, thickness, 3), np.uint8)
+            canvas[plot_y:plot_y+thickness, plot_x:plot_x+border_width, :] = \
+                np.zeros((thickness, border_width, 3), np.uint8)
+            canvas[plot_y+image_width-thickness:plot_y+image_width, plot_x:plot_x+border_width, :] = \
+                np.zeros((thickness, border_width, 3), np.uint8)
+        plt.cla()
+        plt.imshow(canvas)
+        plt.show()
+        time.sleep(0.2)
+
+    def visualize_in_grid(self, nodes):
         activation_per_node = int(self.slot_count / len(nodes))
         if activation_per_node > self.K:
             activation_per_node = self.K
@@ -69,7 +120,7 @@ class VisualGenerator:
 if __name__ == '__main__':
     gen = VisualGenerator('/home/shengjia/DeepLearning/deep-visualization-toolbox/result_out')
     show_list = []
-    for i in range(50, 100):
-        show_list.append({'layer': 'conv4', 'index': i})
-    gen.visualize(show_list)
-
+    for i in range(1, 100):
+        show_list.append({'layer': 'conv4', 'index': i, 'coord': [random.random(), random.random()]})
+    #gen.visualize_in_grid(show_list)
+    gen.visualize_collage(show_list)
