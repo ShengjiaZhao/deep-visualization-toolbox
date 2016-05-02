@@ -81,7 +81,11 @@ if __name__ == '__main__':
         im = caffe.io.load_image(fullpath)
         net.predict([im], oversample=False)   # Just take center crop
         for layer in layers:
-            result_array[layer]['activation'][iter_count:] = net.blobs[layer].data.max(3).max(2).max(0)
+            layer_shape = net.blobs[layer].data.shape
+            if len(layer_shape) == 4:
+                result_array[layer]['activation'][iter_count:] = net.blobs[layer].data.max(3).max(2).max(0)
+            elif len(layer_shape) == 2:
+                result_array[layer]['activation'][iter_count:] = net.blobs[layer].data.max(0)
         iter_count += 1
         if iter_count % 100 == 0:
             print("Processing " + str(iter_count) + "-th image")
