@@ -60,6 +60,10 @@ if __name__ == '__main__':
                            image_dims=(256, 256))
 
     path_list = read_filelist(args.filelist, args.num)
+    path_out = open(os.path.join(args.outdir + 'input.txt'), 'w')
+    for path in path_list:
+        path_out.write(path + '\n')
+    path_out.close()
 
     result_array = {}
     for layer in layers:
