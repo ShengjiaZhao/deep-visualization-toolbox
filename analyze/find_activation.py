@@ -4,18 +4,18 @@ __author__ = 'shengjia'
 import os
 import argparse
 import numpy as np
+import random
 import sys, time
 sys.path.insert(0, '..')
 from find_maxes.loaders import load_imagenet_mean, load_labels, caffe
 
-def read_filelist(filename, max_size):
+
+def read_filelist(filename, count):
     path_list = []
     label_list = []
     infile = open(filename)
     count = 0
     while True:
-        if max_size is not None and count >= max_size:
-            break
         content = infile.readline().split()
         if len(content) == 0:
             break
@@ -25,8 +25,9 @@ def read_filelist(filename, max_size):
         else:
             print("Error: received " + str(len(content)) + " items in a line")
             assert False
-
-    return path_list, label_list
+    if count is not None:
+        path_list = random.sample(path_list, count)
+    return path_list
 
 
 # models/caffenet-yos/caffenet-yos-deploy.prototxt models/caffenet-yos/caffenet-yos-weights /home/ubuntu/sdf/images /home/ubuntu/sdf/database_list activation_out conv3,conv4,conv5
@@ -59,45 +60,33 @@ if __name__ == '__main__':
                            raw_scale=255,
                            image_dims=(256, 256))
 
-    path_list, label_list = read_filelist(args.filelist, args.num)
+    path_list = read_filelist(args.filelist, args.num)
 
     result_array = {}
     for layer in layers:
         layer_result = {'name': layer}
         layer_shape = net.blobs[layer].data.shape
         if len(layer_shape) == 4 or len(layer_shape) == 2:
-            num_images = len(path_list)
-            # if args.num is not None and args.num < num_images:
-            #     num_images = args.num
-            layer_result['activation'] = np.ndarray((num_images, layer_shape[1]), dtype=float, order='C')
+            layer_result['activation'] = np.ndarray((len(path_list), layer_shape[1]), dtype=float, order='C')
         else:
             print("Unknown layer shape")
             exit(-1)
         result_array[layer] = layer_result
 
     iter_count = 0
-    for path, label in zip(path_list, label_list):
-        if args.num and iter_count >= args.num:
-            break
+    for path in zip(path_list):
         fullpath = os.path.join(args.datadir, path)
         if not os.path.isfile(fullpath):
             print("Error: file " + fullpath + " not found")
             sys.stdout.flush()
-        cur_time = time.time()
         im = caffe.io.load_image(fullpath)
         net.predict([im], oversample=False)   # Just take center crop
-        total_time = (time.time() - cur_time) * 1000
-        cur_time = time.time()
-        print("Net: Taking " + str(total_time) + "ms")
-        sys.stdout.flush()
         for layer in layers:
             layer_shape = net.blobs[layer].data.shape
             if len(layer_shape) == 4:
                 result_array[layer]['activation'][iter_count, :] = np.amax(net.blobs[layer].data, (0, 2, 3))
             elif len(layer_shape) == 2:
                 result_array[layer]['activation'][iter_count, :] = net.blobs[layer].data[0:]
-        elapsed_time = (time.time() - cur_time) * 1000
-        print("Copy: Taking " + str(elapsed_time) + "ms")
         iter_count += 1
         if iter_count % 100 == 0:
             print("Processing " + str(iter_count) + "-th image")
