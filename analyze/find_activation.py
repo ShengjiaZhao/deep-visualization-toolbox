@@ -69,7 +69,7 @@ if __name__ == '__main__':
             num_images = len(path_list)
             # if args.num is not None and args.num < num_images:
             #     num_images = args.num
-            layer_result['activation'] = np.ndarray((num_images, layer_shape[1]), dtype=float, order='F')
+            layer_result['activation'] = np.ndarray((num_images, layer_shape[1]), dtype=float, order='C')
         else:
             print("Unknown layer shape")
             exit(-1)
