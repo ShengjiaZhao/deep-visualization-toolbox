@@ -4,7 +4,7 @@ __author__ = 'shengjia'
 import os
 import argparse
 import numpy as np
-import sys
+import sys, time
 sys.path.insert(0, '..')
 from find_maxes.loaders import load_imagenet_mean, load_labels, caffe
 
@@ -80,8 +80,11 @@ if __name__ == '__main__':
         if not os.path.isfile(fullpath):
             print("Error: file " + fullpath + " not found")
             sys.stdout.flush()
+        cur_time = time.time()
         im = caffe.io.load_image(fullpath)
         net.predict([im], oversample=False)   # Just take center crop
+        total_time = (time.time() - cur_time) * 1000
+        print("Taking " + str(total_time) + "ms")
         for layer in layers:
             layer_shape = net.blobs[layer].data.shape
             if len(layer_shape) == 4:
