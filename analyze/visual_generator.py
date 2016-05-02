@@ -7,21 +7,64 @@ from scipy import misc
 
 
 class VisualGenerator:
-    def __init__(self, image_folder, K=9):
+    def __init__(self, image_folder, node_folder, K=9):
         self.image_folder = image_folder
+        self.node_folder = node_folder
         self.K = 9
         self.slot_count = 50
         self.display_size = [1080, 1920]
+        self.sparsity_level = 2
 
-    def visualize_collage(self, nodes, include_deconv=False):
-        image_width = (self.display_size[0] + self.display_size[1]) / math.sqrt(len(nodes))
+    def get_image_width(self, count):
+        image_width = (self.display_size[0] + self.display_size[1]) / math.sqrt(count) / self.sparsity_level
         if image_width > min(self.display_size) / 2:
             image_width = min(self.display_size) / 2
         if image_width < 100:
             image_width = 100
-        image_width = int(image_width)
-        print(image_width)
-        canvas = np.zeros(self.display_size + [3], np.uint8)
+        return int(image_width)
+
+    def draw_border(self, canvas, plot_x, plot_y, width, height, thickness):
+        canvas[plot_y:plot_y+height, plot_x:plot_x+thickness, :] = \
+            np.zeros((height, thickness, 3), np.uint8)
+        canvas[plot_y:plot_y+height, plot_x+width-thickness:plot_x+width, :] = \
+            np.zeros((height, thickness, 3), np.uint8)
+        canvas[plot_y:plot_y+thickness, plot_x:plot_x+width, :] = \
+            np.zeros((thickness, width, 3), np.uint8)
+        canvas[plot_y+height-thickness:plot_y+height, plot_x:plot_x+width, :] = \
+            np.zeros((thickness, width, 3), np.uint8)
+
+    def visualize_collage_image(self, images, keep_ratio=True):
+        image_width = self.get_image_width(len(images))
+        canvas = np.ones(self.display_size + [3], np.uint8) * 255
+        for image in images:
+            plot_x = int(math.floor(image['coord'][0] * (self.display_size[1] - image_width)))
+            plot_y = int(math.floor(image['coord'][1] * (self.display_size[0] - image_width)))
+            image_path = os.path.join(self.image_folder, image['path'])
+            if not os.path.isfile(image_path):
+                print("Error: " + image_path + " do not exist")
+            else:
+                img = misc.imread(image_path)
+                if keep_ratio and img.shape[0] > img.shape[1]:
+                    actual_height = image_width
+                    actual_width = int(image_width * img.shape[1] / img.shape[0])
+                elif keep_ratio and img.shape[0] < img.shape[1]:
+                    actual_height = int(image_width * img.shape[0] / img.shape[1])
+                    actual_width = image_width
+                else:
+                    actual_height = image_width
+                    actual_width = image_width
+            canvas[plot_y:plot_y+image_width, plot_x:plot_x+image_width, :] = \
+                    misc.imresize(img, (actual_height, actual_width))
+            self.draw_border(canvas, plot_x, plot_y, width=actual_width, height=actual_height, thickness=2)
+
+        plt.cla()
+        plt.imshow(canvas)
+        plt.show()
+        time.sleep(0.2)
+
+    def visualize_collage(self, nodes, include_deconv=False):
+        image_width = self.get_image_width(len(nodes))
+        canvas = np.ones(self.display_size + [3], np.uint8) * 255
         for node in nodes:
             if include_deconv:
                 plot_x = int(math.floor(node['coord'][0] * (self.display_size[1] - image_width * 2)))
@@ -29,7 +72,7 @@ class VisualGenerator:
                 plot_x = int(math.floor(node['coord'][0] * (self.display_size[1] - image_width)))
             plot_y = int(math.floor(node['coord'][1] * (self.display_size[0] - image_width)))
 
-            max_path = os.path.join(self.image_folder, node['layer'],
+            max_path = os.path.join(self.node_folder, node['layer'],
                                     'unit_%.4d' % node['index'], 'maxim_000.png')
             if not os.path.isfile(max_path):
                 print("Error: " + max_path + " do not exist")
@@ -39,7 +82,7 @@ class VisualGenerator:
                         misc.imresize(misc.imread(max_path), (image_width, image_width))
 
             if include_deconv:
-                deconv_path = os.path.join(self.image_folder, node['layer'],
+                deconv_path = os.path.join(self.node_folder, node['layer'],
                            'unit_%.4d' % node['index'], 'deconv_000.png')
                 if not os.path.isfile(deconv_path):
                     print("Error: " + deconv_path + " do not exist")
@@ -49,18 +92,10 @@ class VisualGenerator:
                             misc.imresize(misc.imread(deconv_path), (image_width, image_width))
 
             if include_deconv:
-                border_width = image_width*2
+                self.draw_border(canvas, plot_x, plot_y, width=image_width*2, height=image_width, thickness=2)
             else:
-                border_width = image_width
-            thickness = 2
-            canvas[plot_y:plot_y+image_width, plot_x:plot_x+thickness, :] = \
-                np.zeros((image_width, thickness, 3), np.uint8)
-            canvas[plot_y:plot_y+image_width, plot_x+border_width-thickness:plot_x+border_width, :] = \
-                np.zeros((image_width, thickness, 3), np.uint8)
-            canvas[plot_y:plot_y+thickness, plot_x:plot_x+border_width, :] = \
-                np.zeros((thickness, border_width, 3), np.uint8)
-            canvas[plot_y+image_width-thickness:plot_y+image_width, plot_x:plot_x+border_width, :] = \
-                np.zeros((thickness, border_width, 3), np.uint8)
+                self.draw_border(canvas, plot_x, plot_y, width=image_width, height=image_width, thickness=2)
+
         plt.cla()
         plt.imshow(canvas)
         plt.show()
@@ -118,9 +153,14 @@ class VisualGenerator:
 
 
 if __name__ == '__main__':
-    gen = VisualGenerator('/home/shengjia/DeepLearning/deep-visualization-toolbox/result_out')
+    gen = VisualGenerator(image_folder='/home/shengjia/deep-visualization-toolbox/input_images',
+                          node_folder='/home/shengjia/DeepLearning/deep-visualization-toolbox/result_out')
     show_list = []
     for i in range(1, 100):
         show_list.append({'layer': 'conv4', 'index': i, 'coord': [random.random(), random.random()]})
     #gen.visualize_in_grid(show_list)
-    gen.visualize_collage(show_list)
+    gen.visualize_collage(show_list, True)
+
+    img_path_list = ['ILSVRC2012_val_00000610.jpg', 'ILSVRC2012_val_00006491.jpg'] * 10
+    img_with_coord = [{'path': image_path, 'coord': [random.random(), random.random()]} for image_path in img_path_list]
+    gen.visualize_collage_image(img_with_coord)
