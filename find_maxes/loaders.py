@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 
-
+import sys
 REMOTE_USE = True
 # Make sure that caffe is on the python path:
 if REMOTE_USE:
@@ -10,6 +10,7 @@ if REMOTE_USE:
     matplotlib.use('Agg')
 else:
     caffe_root = '/home/shengjia/caffe/'
+sys.path.insert(0, caffe_root + 'python')
 
 from pylab import *
 import sys
