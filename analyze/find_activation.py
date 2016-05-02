@@ -26,6 +26,7 @@ def read_filelist(filename, read_num):
             assert False
     if read_num is not None:
         path_list = random.sample(path_list, read_num)
+        path_list.sort()
     return path_list
 
 
