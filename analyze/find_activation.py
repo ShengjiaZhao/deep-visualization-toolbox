@@ -26,7 +26,7 @@ def read_filelist(filename, read_num):
             assert False
     if read_num is not None:
         path_list = random.sample(path_list, read_num)
-        path_list.sort()
+        path_list.sort()        # Accessing files in order improves file system performance
     return path_list
 
 
@@ -101,6 +101,7 @@ if __name__ == '__main__':
         iter_count += 1
         if iter_count % 100 == 0:
             print("Processing " + str(iter_count) + "-th image, average time: " + str(avg_time * 10) + "ms")
+            avg_time = 0.0
             sys.stdout.flush()
 
     print("Finished, saving to file")
