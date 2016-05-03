@@ -8,7 +8,7 @@ import os
 if __name__ == '__main__':
     top_K = 10
     root_dir = '/home/ubuntu/sdf/activations/'
-    layer_list = ['conv3', 'conv4', 'conv5', 'fc6', 'fc7', 'fc8']
+    layer_list = ['conv3', 'conv4', 'conv5', 'fc6', 'fc7']
     for layer in layer_list:
         activation = np.load(os.path.join(root_dir, layer))
 
