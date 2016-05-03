@@ -22,8 +22,8 @@ if __name__ == '__main__':
             activation[index, :] = np.zeros(activation.shape[1], np.float)
             for max in max_index:
                 activation[index, max] = 1.0
-            if index % 100 == 0:
-                print("Processing " + str(index))
+            if index % 1000 == 0:
+                print("Processing " + str(index) + "-th image")
 
         # print(activation)
-        np.save(os.path.join(root_dir, 'binary_' + layer))
+        np.save(os.path.join(root_dir, 'binary_' + layer), activation)
