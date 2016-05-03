@@ -19,9 +19,15 @@ class Converter:
             activation = np.load(os.path.join(self.root_dir, layer + '.npy'))
 
             # Code for testing correctness
-            # activation = np.array([[1, 2, 3, 4, 5, 6, 7, 8, 9], [9, 8, 7, 6, 5, 4, 3, 2, 1]])
+            # activation = np.array([[9, 2, 3, 4, 5, 6, 7, 8, 9], [9, 8, 7, 6, 5, 4, 3, 2, 1], [2, 5, 7, 8, 2, 1, 8, 2, 8]], np.float)
             # top_K = 2
-
+            # Normalize activation
+            min_mat = np.tile(np.expand_dims(np.min(activation, 0), 0), (activation.shape[0], 1))
+            range_mat = np.max(activation, 0) - np.min(activation, 0)
+            range_mat = np.clip(range_mat, 1e-6, np.max(range_mat))
+            range_mat = np.tile(np.expand_dims(range_mat, 0), (activation.shape[0], 1))
+            activation = np.divide(np.subtract(activation, min_mat), range_mat)
+            print(activation)
             for index in range(activation.shape[0]):
                 max_index = activation[index, :].argsort()[-top_K:]
                 activation[index, :] = np.zeros(activation.shape[1], np.float)
@@ -29,8 +35,9 @@ class Converter:
                     activation[index, max] = 1.0
                 if index % 1000 == 0:
                     print("Processing " + str(index) + "-th image")
-
             # print(activation)
+            # print(activation)
+            # break
             np.save(os.path.join(self.root_dir, 'binary_' + str(top_K) + '_' + layer), activation)
 
     def output_covariance(self, top_K):
