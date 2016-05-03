@@ -56,6 +56,9 @@ class VisualGenerator:
                 print("Error: " + image_path + " do not exist")
             else:
                 img = misc.imread(image_path)
+                if len(img.shape) == 2:
+                    print("Warning: image with only two channels")
+                    img = np.tile(img, (1, 1, 3))
                 if keep_ratio and img.shape[0] > img.shape[1]:
                     actual_height = image_width
                     actual_width = int(image_width * img.shape[1] / img.shape[0])
