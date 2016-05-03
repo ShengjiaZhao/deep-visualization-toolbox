@@ -65,7 +65,7 @@ class VisualGenerator:
                 else:
                     actual_height = image_width
                     actual_width = image_width
-                canvas[plot_y:plot_y+image_width, plot_x:plot_x+image_width, :] = \
+                canvas[plot_y:plot_y+actual_height, plot_x:plot_x+actual_width, :] = \
                         misc.imresize(img, (actual_height, actual_width))
             self.draw_border(canvas, plot_x, plot_y, width=actual_width, height=actual_height, thickness=2)
         return canvas
