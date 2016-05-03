@@ -33,7 +33,19 @@ class VisualGenerator:
         canvas[plot_y+height-thickness:plot_y+height, plot_x:plot_x+width, :] = \
             np.zeros((thickness, width, 3), np.uint8)
 
+    def normalize(self, array):
+        x_coords = [obj['coord'][0] for obj in array]
+        y_coords = [obj['coord'][1] for obj in array]
+        x_max = np.max(x_coords)
+        x_min = np.min(x_coords)
+        y_max = np.max(y_coords)
+        y_min = np.min(y_coords)
+        for obj in array:
+            obj['coord'][0] = (obj['coord'][0] - x_min) / (x_max - x_min)
+            obj['coord'][1] = (obj['coord'][1] - y_min) / (y_max - y_min)
+
     def visualize_collage_image(self, images, keep_ratio=True):
+        self.normalize(images)
         image_width = self.get_image_width(len(images))
         canvas = np.ones(self.display_size + [3], np.uint8) * 255
         for image in images:
@@ -59,6 +71,7 @@ class VisualGenerator:
         return canvas
 
     def visualize_collage_node(self, nodes, include_deconv=False):
+        self.normalize(nodes)
         image_width = self.get_image_width(len(nodes))
         canvas = np.ones(self.display_size + [3], np.uint8) * 255
         for node in nodes:
