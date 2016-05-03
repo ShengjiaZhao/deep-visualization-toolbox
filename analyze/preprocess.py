@@ -45,7 +45,7 @@ class Converter:
         print("Writing to file")
         np.save(os.path.join(self.root_dir, 'convariance_' + str(top_K)), cov)
         mat_sum = np.sum(cov)
-        print("Sum of elements is " + str(mat_sum) + " in a matrix with " + str(mat_sum.size) + " elements")
+        print("Sum of elements is " + str(mat_sum) + " in a matrix with " + str(cov.size) + " elements")
 
 
 if __name__ == '__main__':
