@@ -10,7 +10,7 @@ if __name__ == '__main__':
     root_dir = '/home/ubuntu/sdf/activations/'
     layer_list = ['conv3', 'conv4', 'conv5', 'fc6', 'fc7']
     for layer in layer_list:
-        activation = np.load(os.path.join(root_dir, layer))
+        activation = np.load(os.path.join(root_dir, layer + '.npy'))
 
         # Code for testing correctness
         # activation = np.array([[1, 2, 3, 4, 5, 6, 7, 8, 9], [9, 8, 7, 6, 5, 4, 3, 2, 1]])
