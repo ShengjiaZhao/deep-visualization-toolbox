@@ -170,8 +170,8 @@ class TSNEVisualizer:
 
 def example_visualization_callback(Y):
     Plot.cla()
-    Plot.show()
     Plot.scatter(Y[:,0], Y[:,1], 8, labels)
+    Plot.draw()
 
 if __name__ == "__main__":
     print "Run Y = tsne.tsne(X, no_dims, perplexity) to perform t-SNE on your dataset."
