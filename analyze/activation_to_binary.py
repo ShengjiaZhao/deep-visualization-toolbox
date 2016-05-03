@@ -10,6 +10,7 @@ if __name__ == '__main__':
     root_dir = '/home/ubuntu/sdf/activations/'
     layer_list = ['conv3', 'conv4', 'conv5', 'fc6', 'fc7']
     for layer in layer_list:
+        print("Transforming layer " + layer)
         activation = np.load(os.path.join(root_dir, layer + '.npy'))
 
         # Code for testing correctness
@@ -21,6 +22,8 @@ if __name__ == '__main__':
             activation[index, :] = np.zeros(activation.shape[1], np.float)
             for max in max_index:
                 activation[index, max] = 1.0
+            if index % 100 == 0:
+                print("Processing " + str(index))
 
         # print(activation)
         np.save(os.path.join(root_dir, 'binary_' + layer))
