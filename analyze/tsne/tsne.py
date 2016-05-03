@@ -95,7 +95,7 @@ class TSNEVisualizer:
         return Y
 
 
-    def tsne(self, X = Math.array([]), no_dims = 2, initial_dims = 50, perplexity = 30.0):
+    def tsne(self, X = Math.array([]), no_dims = 2, initial_dims = 50, perplexity = 30.0, visualization_callback=None):
         """Runs t-SNE on the dataset in the NxD array X to reduce its dimensionality to no_dims dimensions.
         The syntaxis of the function is Y = tsne.tsne(X, no_dims, perplexity), where X is an NxD NumPy array."""
 
@@ -157,9 +157,8 @@ class TSNEVisualizer:
             if (iter + 1) % 10 == 0:
                 C = Math.sum(P * Math.log(P / Q))
                 print "Iteration ", (iter + 1), ": error is ", C
-            Plot.cla()
-            Plot.scatter(Y[:,0], Y[:,1], 20, labels)
-            Plot.draw()
+            if visualization_callback:
+                visualization_callback(Y[:, 0:2])
 
             # Stop lying about P-values
             if iter == 100:
@@ -168,6 +167,11 @@ class TSNEVisualizer:
         # Return solution
         return Y
 
+
+def example_visualization_callback(Y):
+    Plot.cla()
+    Plot.show()
+    Plot.scatter(Y[:,0], Y[:,1], 8, labels)
 
 if __name__ == "__main__":
     print "Run Y = tsne.tsne(X, no_dims, perplexity) to perform t-SNE on your dataset."
@@ -178,7 +182,7 @@ if __name__ == "__main__":
 
     Plot.ion()
     Plot.show()
-    Y = TSNEVisualizer().tsne(X, 2, 50, 20.0)
+    Y = TSNEVisualizer().tsne(X, 2, 50, 20.0, visualization_callback=example_visualization_callback)
     Plot.scatter(Y[:,0], Y[:,1], 8, labels)
 
 
