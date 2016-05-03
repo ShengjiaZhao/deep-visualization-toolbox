@@ -49,6 +49,6 @@ class Converter:
 
 if __name__ == '__main__':
     converter = Converter(root_dir = '/home/ubuntu/sdf/activations/',
-                          layer_list = ['conv3', 'conv4', 'conv5', 'fc6', 'fc7'])
+                          layer_list = ['conv3', 'conv4', 'conv5'])
     converter.output_binary(10)
     converter.output_covariance(10)
