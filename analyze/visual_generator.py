@@ -53,8 +53,8 @@ class VisualGenerator:
                 else:
                     actual_height = image_width
                     actual_width = image_width
-            canvas[plot_y:plot_y+image_width, plot_x:plot_x+image_width, :] = \
-                    misc.imresize(img, (actual_height, actual_width))
+                canvas[plot_y:plot_y+image_width, plot_x:plot_x+image_width, :] = \
+                        misc.imresize(img, (actual_height, actual_width))
             self.draw_border(canvas, plot_x, plot_y, width=actual_width, height=actual_height, thickness=2)
 
         plt.cla()
@@ -159,7 +159,7 @@ if __name__ == '__main__':
     for i in range(1, 100):
         show_list.append({'layer': 'conv4', 'index': i, 'coord': [random.random(), random.random()]})
     #gen.visualize_in_grid(show_list)
-    gen.visualize_collage(show_list, True)
+    gen.visualize_collage_node(show_list, True)
 
     img_path_list = ['ILSVRC2012_val_00000610.jpg', 'ILSVRC2012_val_00006491.jpg'] * 10
     img_with_coord = [{'path': image_path, 'coord': [random.random(), random.random()]} for image_path in img_path_list]
