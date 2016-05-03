@@ -57,8 +57,9 @@ class VisualGenerator:
             else:
                 img = misc.imread(image_path)
                 if len(img.shape) == 2:
-                    print("Warning: image with only two channels")
+                    print("Warning: image " + image_path + " with only two channels")
                     img = np.tile(img, (1, 1, 3))
+                    print(img.shape)
                 if keep_ratio and img.shape[0] > img.shape[1]:
                     actual_height = image_width
                     actual_width = int(image_width * img.shape[1] / img.shape[0])
@@ -163,7 +164,7 @@ if __name__ == '__main__':
     for i in range(1, 100):
         show_list.append({'layer': 'conv4', 'index': i, 'coord': [random.random(), random.random()]})
     #gen.visualize_in_grid(show_list)
-    gen.visualize_collage_node(show_list, True)
+    #gen.visualize_collage_node(show_list, True)
 
     img_path_list = ['ILSVRC2012_val_00000610.jpg', 'ILSVRC2012_val_00006491.jpg'] * 10
     img_with_coord = [{'path': image_path, 'coord': [random.random(), random.random()]} for image_path in img_path_list]
