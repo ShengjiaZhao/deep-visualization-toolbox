@@ -158,7 +158,7 @@ class TSNEVisualizer:
                 C = Math.sum(P * Math.log(P / Q))
                 print "Iteration ", (iter + 1), ": error is ", C
             if visualization_callback:
-                visualization_callback(Y[:, 0:2])
+                visualization_callback(Y[:, 0:2], iter)
 
             # Stop lying about P-values
             if iter == 100:
