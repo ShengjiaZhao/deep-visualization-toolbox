@@ -56,11 +56,7 @@ class VisualGenerator:
                 canvas[plot_y:plot_y+image_width, plot_x:plot_x+image_width, :] = \
                         misc.imresize(img, (actual_height, actual_width))
             self.draw_border(canvas, plot_x, plot_y, width=actual_width, height=actual_height, thickness=2)
-
-        plt.cla()
-        plt.imshow(canvas)
-        plt.show()
-        time.sleep(0.2)
+        return canvas
 
     def visualize_collage_node(self, nodes, include_deconv=False):
         image_width = self.get_image_width(len(nodes))
@@ -95,11 +91,7 @@ class VisualGenerator:
                 self.draw_border(canvas, plot_x, plot_y, width=image_width*2, height=image_width, thickness=2)
             else:
                 self.draw_border(canvas, plot_x, plot_y, width=image_width, height=image_width, thickness=2)
-
-        plt.cla()
-        plt.imshow(canvas)
-        plt.show()
-        time.sleep(0.2)
+        return canvas
 
     def visualize_in_grid(self, nodes):
         activation_per_node = int(self.slot_count / len(nodes))
@@ -145,11 +137,7 @@ class VisualGenerator:
                     canvas[row*image_width:row*image_width+image_width,
                             col*image_width*2+image_width:(col+1)*image_width*2, :] = \
                             misc.imresize(misc.imread(deconv_path), (image_width, image_width))
-
-        plt.cla()
-        plt.imshow(canvas)
-        plt.show()
-        time.sleep(0.2)
+        return canvas
 
 
 if __name__ == '__main__':
