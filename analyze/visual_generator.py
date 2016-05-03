@@ -62,7 +62,7 @@ class VisualGenerator:
         plt.show()
         time.sleep(0.2)
 
-    def visualize_collage(self, nodes, include_deconv=False):
+    def visualize_collage_node(self, nodes, include_deconv=False):
         image_width = self.get_image_width(len(nodes))
         canvas = np.ones(self.display_size + [3], np.uint8) * 255
         for node in nodes:
