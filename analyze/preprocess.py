@@ -43,7 +43,7 @@ class Converter:
         total = np.concatenate(activations, 1)
         cov = np.dot(total.transpose(), total)
         print("Writing to file")
-        np.save(os.path.join(self.root_dir, 'convariance_' + str(top_K)), cov)
+        np.save(os.path.join(self.root_dir, 'covariance_' + str(top_K)), cov)
         mat_sum = np.sum(cov)
         print("Sum of elements is " + str(mat_sum) + " in a matrix with " + str(cov.size) + " elements")
 
