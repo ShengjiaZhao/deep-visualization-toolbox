@@ -7,7 +7,9 @@ from scipy import misc
 
 
 class VisualGenerator:
+
     def __init__(self, image_folder, node_folder, K=9):
+        """ Create a visualizer by passing in path to the images and path to node visualizations """
         self.image_folder = image_folder
         self.node_folder = node_folder
         self.K = 9
@@ -16,6 +18,7 @@ class VisualGenerator:
         self.sparsity_level = 2
 
     def get_image_width(self, count):
+        """ Private function to obtain the appropriate display width for each image """
         image_width = (self.display_size[0] + self.display_size[1]) / math.sqrt(count) / self.sparsity_level
         if image_width > min(self.display_size) / 2:
             image_width = min(self.display_size) / 2
@@ -24,6 +27,7 @@ class VisualGenerator:
         return int(image_width)
 
     def draw_border(self, canvas, plot_x, plot_y, width, height, thickness):
+        """ Private function to draw a rectangle as border """
         canvas[plot_y:plot_y+height, plot_x:plot_x+thickness, :] = \
             np.zeros((height, thickness, 3), np.uint8)
         canvas[plot_y:plot_y+height, plot_x+width-thickness:plot_x+width, :] = \
@@ -33,7 +37,9 @@ class VisualGenerator:
         canvas[plot_y+height-thickness:plot_y+height, plot_x:plot_x+width, :] = \
             np.zeros((thickness, width, 3), np.uint8)
 
-    def normalize(self, array):
+    @staticmethod
+    def normalize(array):
+        """ Normalize the values to lie within [0, 1] """
         x_coords = [obj['coord'][0] for obj in array]
         y_coords = [obj['coord'][1] for obj in array]
         x_max = np.max(x_coords)
@@ -45,6 +51,12 @@ class VisualGenerator:
             obj['coord'][1] = (obj['coord'][1] - y_min) / (y_max - y_min)
 
     def visualize_collage_image(self, images, keep_ratio=True):
+        """ Visualize a collage of images
+        :param images: an array of dicts. Each item should contain a path field that specifies the relative location
+        under image_folder and a coord field, which is a seq of coordinates (x, y)
+        :param keep_ratio: if this is true, the image are visualized with their original aspect ratio, otherwise they
+        are rescaled as square images
+        """
         self.normalize(images)
         image_width = self.get_image_width(len(images))
         canvas = np.ones(self.display_size + [3], np.uint8) * 255
@@ -75,6 +87,12 @@ class VisualGenerator:
         return canvas
 
     def visualize_collage_node(self, nodes, include_deconv=False):
+        """ Visualize a collage of nodes
+        :param nodes: an array of dicts. Each item should contain a layer and index field that specifies the name of
+        the layer, and index of node in that layer. Also a coord field, which is a seq of coordinates (x, y) should be
+        included
+        :param include_deconv: if this is true, deconvolution is also included. Otherwise only the image is displayed
+        """
         self.normalize(nodes)
         image_width = self.get_image_width(len(nodes))
         canvas = np.ones(self.display_size + [3], np.uint8) * 255
@@ -111,6 +129,10 @@ class VisualGenerator:
         return canvas
 
     def visualize_in_grid(self, nodes):
+        """ Visualize a collection of nodes in a evenly spaced grid
+        :param nodes: an array of dicts. Each item should contain a layer and index field that specifies the name of
+        the layer, and index of node in that layer
+        """
         activation_per_node = int(self.slot_count / len(nodes))
         if activation_per_node > self.K:
             activation_per_node = self.K
