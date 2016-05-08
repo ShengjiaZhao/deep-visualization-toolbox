@@ -160,9 +160,9 @@ class VisualGenerator:
                 row = int(math.floor(slot_counter / column_count))
                 col = slot_counter % column_count
                 slot_counter += 1
-                max_path = os.path.join(self.image_folder, node['layer'],
+                max_path = os.path.join(self.node_folder, node['layer'],
                                         'unit_%.4d' % node['index'], 'maxim_%.3d.png' % index)
-                deconv_path = os.path.join(self.image_folder, node['layer'],
+                deconv_path = os.path.join(self.node_folder, node['layer'],
                                            'unit_%.4d' % node['index'], 'deconv_%.3d.png' % index)
                 if not os.path.isfile(max_path):
                     print("Error: " + max_path + " do not exist")
