@@ -5,9 +5,9 @@ import sys
 import os
 import shutil
 
-database_path = '/home/ubuntu/sdg'
-labelfile_path = '/home/ubuntu/sdg/names'
-listfile_path = '/home/ubuntu/sdg/database_list'
+database_path = '/home/ubuntu/sdf/images'
+labelfile_path = '/home/ubuntu/sdf/names'
+listfile_path = '/home/ubuntu/sdf/image_list'
 
 # database_path = '/home/shengjia/deep-visualization-toolbox/input_images'
 # database_dest = 'output_image'
