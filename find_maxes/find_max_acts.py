@@ -19,6 +19,7 @@ def main():
     parser = argparse.ArgumentParser(description='Finds images in a training set that cause max activation for a network; saves results in a pickled NetMaxTracker.')
     parser.add_argument('--N', type = int, default = 9, help = 'note and save top N activations')
     parser.add_argument('--gpu', action = 'store_true', help = 'use gpu')
+    parser.add_argument('--num', type = int, default = None, help = 'the maximum number of images to process')
     parser.add_argument('net_prototxt', type = str, default = '', help = 'network prototxt to load')
     parser.add_argument('net_weights', type = str, default = '', help = 'network weights to load')
     parser.add_argument('datadir', type = str, default = '.', help = 'directory to look for files in')
@@ -40,11 +41,10 @@ def main():
         caffe.set_mode_cpu()
 
     with WithTimer('Scanning images'):
-        max_tracker = scan_images_for_maxes(net, args.datadir, args.filelist, args.N)
+        max_tracker = scan_images_for_maxes(net, args.datadir, args.filelist, args.N, args.num)
     with WithTimer('Saving maxes'):
         with open(args.outfile, 'wb') as ff:
             pickle.dump(max_tracker, ff, -1)
-
 
 
 if __name__ == '__main__':

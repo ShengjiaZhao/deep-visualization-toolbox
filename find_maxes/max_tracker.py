@@ -114,20 +114,22 @@ class NetMaxTracker(object):
             self.max_trackers[layer].update(blob, image_idx, image_class)
 
 
-def load_file_list(filelist):
+def load_file_list(filelist, max_images=None):
     image_filenames = []
     image_labels = []
+    count = 0
     with open(filelist, 'r') as ff:
         for line in ff.readlines():
+            if max_images is not None and count >= max_images:
+                break
             fields = line.strip().split()
             image_filenames.append(fields[0])
             image_labels.append(int(fields[1]))
     return image_filenames, image_labels
 
 
-
-def scan_images_for_maxes(net, datadir, filelist, n_top):
-    image_filenames, image_labels = load_file_list(filelist)
+def scan_images_for_maxes(net, datadir, filelist, n_top, max_images=None):
+    image_filenames, image_labels = load_file_list(filelist, max_images)
     print 'Scanning %d files' % len(image_filenames)
     print '  First file', os.path.join(datadir, image_filenames[0])
 
