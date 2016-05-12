@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 mkdir -p output
 python find_max_acts.py --N 9 --gpu \
     ../models/caffenet-yos/caffenet-yos-deploy.prototxt ../models/caffenet-yos/caffenet-yos-weights \
