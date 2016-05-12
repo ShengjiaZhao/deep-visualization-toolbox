@@ -4,14 +4,14 @@ import numpy as np
 from matplotlib import pyplot as plt
 import os, random, time, math
 from scipy import misc
+from config import settings
 
 
 class VisualGenerator:
-
-    def __init__(self, image_folder, node_folder, K=9):
+    def __init__(self, K=9):
         """ Create a visualizer by passing in path to the images and path to node visualizations """
-        self.image_folder = image_folder
-        self.node_folder = node_folder
+        self.image_folder = settings['image_root']
+        self.node_folder = settings['node_root']
         self.K = 9
         self.slot_count = 50
         self.display_size = [1080, 1920]
@@ -180,8 +180,7 @@ class VisualGenerator:
 
 
 if __name__ == '__main__':
-    gen = VisualGenerator(image_folder='/home/shengjia/deep-visualization-toolbox/input_images',
-                          node_folder='/home/shengjia/DeepLearning/deep-visualization-toolbox/result_out')
+    gen = VisualGenerator()
     show_list = []
     for i in range(1, 100):
         show_list.append({'layer': 'conv4', 'index': i, 'coord': [random.random(), random.random()]})
