@@ -3,10 +3,12 @@ __author__ = 'shengjia'
 
 import numpy as np
 import os
+from config import settings
+
 
 class Converter:
-    def __init__(self, root_dir, layer_list):
-        self.root_dir = root_dir
+    def __init__(self, layer_list):
+        self.root_dir = settings['activation_root']
         self.layer_list = layer_list
 
     def output_binary(self, top_K, replace=False):
@@ -27,7 +29,7 @@ class Converter:
             range_mat = np.clip(range_mat, 1e-6, np.max(range_mat))
             range_mat = np.tile(np.expand_dims(range_mat, 0), (activation.shape[0], 1))
             activation = np.divide(np.subtract(activation, min_mat), range_mat)
-            print(activation)
+            # print(activation)
             for index in range(activation.shape[0]):
                 max_index = activation[index, :].argsort()[-top_K:]
                 activation[index, :] = np.zeros(activation.shape[1], np.float)
@@ -35,9 +37,6 @@ class Converter:
                     activation[index, max] = 1.0
                 if index % 1000 == 0:
                     print("Processing " + str(index) + "-th image")
-            # print(activation)
-            # print(activation)
-            # break
             np.save(os.path.join(self.root_dir, 'binary_' + str(top_K) + '_' + layer), activation)
 
     def output_covariance(self, top_K):
@@ -56,7 +55,6 @@ class Converter:
 
 
 if __name__ == '__main__':
-    converter = Converter(root_dir = '/home/ubuntu/sdf/activations/',
-                          layer_list = ['conv3', 'conv4', 'conv5'])
-    converter.output_binary(10)
+    converter = Converter(layer_list = ['conv3', 'conv4', 'conv5'])
+    converter.output_binary(10, replace=True)
     converter.output_covariance(10)
