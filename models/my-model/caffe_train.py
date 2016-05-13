@@ -43,8 +43,8 @@ begin_time = time.time()
 
 if not os.path.isdir('output'):
     os.mkdir('output')
-logger = open('output/log')
-test_logger = open('output/test_log')
+logger = open('output/log', 'w')
+test_logger = open('output/test_log', 'w')
 
 # the main solver loop
 for it in range(niter):
