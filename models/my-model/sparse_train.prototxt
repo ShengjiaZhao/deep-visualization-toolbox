@@ -198,14 +198,30 @@ layer {
   top: "conv3"
 }
 layer {
-  name: "loss_conv3"
-  type: "Reduction"
+  name: "conv3_loss_pool"
+  type: "Pooling"
   bottom: "conv3"
-  top: "loss_conv3"
-  reduction_param {
-    operation: SUM
+  top: "conv3_loss_pool"
+  pooling_param {
+    pool: MAX
+    kernel_size: 13
   }
-  loss_weight: 1
+}
+layer {
+  name: "conv3_loss_sig"
+  type: "Sigmoid"
+  bottom: "conv3_loss_pool"
+  top: "conv3_loss_sig"
+}
+layer {
+  name: "conv3_loss"
+  type: "Reduction"
+  bottom: "conv3_loss_sig"
+  top: "conv3_loss"
+  reduction_param {
+    operation: MEAN
+  }
+  loss_weight: 0.1
 }
 layer {
   name: "conv4"
@@ -240,6 +256,32 @@ layer {
   type: "ReLU"
   bottom: "conv4"
   top: "conv4"
+}
+layer {
+  name: "conv4_loss_pool"
+  type: "Pooling"
+  bottom: "conv4"
+  top: "conv4_loss_pool"
+  pooling_param {
+    pool: MAX
+    kernel_size: 13
+  }
+}
+layer {
+  name: "conv4_loss_sig"
+  type: "Sigmoid"
+  bottom: "conv4_loss_pool"
+  top: "conv4_loss_sig"
+}
+layer {
+  name: "conv4_loss"
+  type: "Reduction"
+  bottom: "conv4_loss_sig"
+  top: "conv4_loss"
+  reduction_param {
+    operation: MEAN
+  }
+  loss_weight: 0.1
 }
 layer {
   name: "conv5"
