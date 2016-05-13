@@ -2,6 +2,8 @@ __author__ = 'shengjia'
 
 import sys
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 
 # The caffe module needs to be on the Python path;
 #  we'll add it here explicitly.
