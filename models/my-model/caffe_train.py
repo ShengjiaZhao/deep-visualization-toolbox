@@ -5,6 +5,13 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 
+if len(sys.argv) > 1:
+    solver_file = sys.argv
+    print("Solver file: " + str(solver_file))
+else:
+    print("Usage: caffe_train.py solver_file")
+    exit(-1)
+
 # The caffe module needs to be on the Python path;
 #  we'll add it here explicitly.
 caffe_root = '/home/ubuntu/caffe/'  # this file should be run from {caffe_root}/examples (otherwise change this line)
@@ -18,7 +25,7 @@ os.chdir('/home/ubuntu/deep-visualization-toolbox/models/my-model')
 
 ### load the solver and create train and test nets
 solver = None  # ignore this workaround for lmdb data (can't instantiate two solvers on the same data)
-solver = caffe.SGDSolver('original_solver.prototxt')
+solver = caffe.SGDSolver(solver_file)
 
 transformer = caffe.io.Transformer({'data': solver.net.blobs['data'].data.shape})
 data_mean = np.load('ilsvrc12/ilsvrc_2012_mean.npy').mean(1).mean(1)
@@ -34,6 +41,7 @@ names = [line.split()[1] for line in lines]
 import time
 niter = 20000
 test_interval = 100
+save_interval = 10000
 # losses will also be stored in the log
 train_loss = np.zeros(niter)
 test_acc = np.zeros(int(np.ceil(niter / test_interval)))
@@ -85,6 +93,10 @@ for it in range(niter):
         test_logger.write(str(it) + " " + str(correct / 100.0 / batch_size) + "\n")
         test_logger.flush()
         logger.flush()
+
+    if it % save_interval == 0:
+        print("Saving net")
+        solver.net.save('output/' + solver_file.split('.')[0] + '.caffemodel')
 
 logger.close()
 test_logger.close()
