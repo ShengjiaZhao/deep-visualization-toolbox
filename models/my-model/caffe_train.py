@@ -46,6 +46,8 @@ if not os.path.isdir('output'):
 logger = open('output/log', 'w')
 test_logger = open('output/test_log', 'w')
 
+sparse_layers = ['conv3', 'conv4', 'conv5']
+
 # the main solver loop
 for it in range(niter):
     step_time = time.time()
@@ -57,6 +59,15 @@ for it in range(niter):
     print("Iter " + str(it) + " -- Train loss: " + str(train_loss[it]) +
           " -- Time used: " + str(elapsed_time) + "s -- Total time: " + str(time.time() - begin_time) + "s")
     logger.write(str(it) + " " + str(train_loss[it]) + " " + str(elapsed_time) + "\n")
+
+    # Compute average activations once in a while
+    test_logger.write("Average activation: ")
+    if it % test_interval == 0:
+        for sparse_layer in sparse_layers:
+            activation = np.average(solver.net.blobs[sparse_layer].data)
+            print(str(activation) + "(" + sparse_layer + ")"),
+        test_logger.write(str(activation) + "(" + sparse_layer + ") ")
+    test_logger.write("\n")
 
     # run a full test every so often
     # (Caffe can also do this for us and write to a log, but we show here
