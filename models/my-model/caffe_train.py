@@ -40,6 +40,12 @@ test_acc = np.zeros(int(np.ceil(niter / test_interval)))
 output = np.zeros((niter, 8, 10))
 
 begin_time = time.time()
+
+if not os.path.isdir('output'):
+    os.mkdir('output')
+logger = open('output/log')
+test_logger = open('output/test_log')
+
 # the main solver loop
 for it in range(niter):
     step_time = time.time()
@@ -50,6 +56,7 @@ for it in range(niter):
     train_loss[it] = solver.net.blobs['loss'].data
     print("Iter " + str(it) + " -- Train loss: " + str(train_loss[it]) +
           " -- Time used: " + str(elapsed_time) + "s -- Total time: " + str(time.time() - begin_time) + "s")
+    logger.write(str(it) + " " + str(train_loss[it]) + " " + str(elapsed_time) + "\n")
 
     # run a full test every so often
     # (Caffe can also do this for us and write to a log, but we show here
@@ -57,9 +64,16 @@ for it in range(niter):
     if it % test_interval == 0:
         print 'Iteration', it, 'testing...'
         correct = 0
+        batch_size = solver.test_nets[0].blobs['data'].data.shape[0]
         for test_it in range(100):
             solver.test_nets[0].forward()
             correct += sum(solver.test_nets[0].blobs['fc8'].data.argmax(1)
                            == solver.test_nets[0].blobs['label'].data)
-        test_acc[it // test_interval] = correct / 1e4
-        print("Test accuracy: " + str(correct / 1e4))
+        test_acc[it // test_interval] = correct / 100.0 / batch_size
+        print("Test accuracy: " + str(correct / 100.0 / batch_size))
+        test_logger.write(str(it) + " " + str(correct / 100.0 / batch_size))
+        test_logger.flush()
+        logger.flush()
+
+logger.close()
+test_logger.close()
