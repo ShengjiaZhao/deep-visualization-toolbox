@@ -75,7 +75,7 @@ for it in range(niter):
     if it % test_interval == 0:
         test_logger.write("Average activation: ")
         for sparse_layer in sparse_layers:
-            activation = np.average(solver.net.blobs[sparse_layer].data)
+            activation = np.average(solver.net.blobs[sparse_layer + '_loss_sig'].data)
             print(str(activation) + "(" + sparse_layer + ")"),
             test_logger.write(str(activation) + "(" + sparse_layer + ") ")
         print("")
