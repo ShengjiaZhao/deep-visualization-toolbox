@@ -71,7 +71,7 @@ for it in range(niter):
                            == solver.test_nets[0].blobs['label'].data)
         test_acc[it // test_interval] = correct / 100.0 / batch_size
         print("Test accuracy: " + str(correct / 100.0 / batch_size))
-        test_logger.write(str(it) + " " + str(correct / 100.0 / batch_size))
+        test_logger.write(str(it) + " " + str(correct / 100.0 / batch_size) + "\n")
         test_logger.flush()
         logger.flush()
 
