@@ -20,12 +20,15 @@ import caffe
 caffe.set_device(0)
 caffe.set_mode_gpu()
 
+pretrained_model = caffe_root + 'models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel'
+
 import os
 os.chdir('/home/ubuntu/deep-visualization-toolbox/models/my-model')
 
 ### load the solver and create train and test nets
 solver = None  # ignore this workaround for lmdb data (can't instantiate two solvers on the same data)
 solver = caffe.SGDSolver(solver_file)
+solver.net = caffe.Net('sparse.prototxt', pretrained_model, caffe.TRAIN)
 
 transformer = caffe.io.Transformer({'data': solver.net.blobs['data'].data.shape})
 data_mean = np.load('ilsvrc12/ilsvrc_2012_mean.npy').mean(1).mean(1)
@@ -75,6 +78,7 @@ for it in range(niter):
             activation = np.average(solver.net.blobs[sparse_layer].data)
             print(str(activation) + "(" + sparse_layer + ")"),
             test_logger.write(str(activation) + "(" + sparse_layer + ") ")
+        print("")
         test_logger.write("\n")
 
     # run a full test every so often
