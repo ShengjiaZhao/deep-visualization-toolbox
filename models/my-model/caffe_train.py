@@ -28,7 +28,7 @@ os.chdir('/home/ubuntu/deep-visualization-toolbox/models/my-model')
 ### load the solver and create train and test nets
 solver = None  # ignore this workaround for lmdb data (can't instantiate two solvers on the same data)
 solver = caffe.SGDSolver(solver_file)
-solver.net = caffe.Net('sparse_train.prototxt', pretrained_model, caffe.TRAIN)
+solver.net.copy_from(pretrained_model)
 
 transformer = caffe.io.Transformer({'data': solver.net.blobs['data'].data.shape})
 data_mean = np.load('ilsvrc12/ilsvrc_2012_mean.npy').mean(1).mean(1)
