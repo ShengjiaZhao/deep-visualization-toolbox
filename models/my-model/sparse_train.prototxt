@@ -98,16 +98,6 @@ layer {
   }
 }
 layer {
-  name: "loss_pool1"
-  type: "Reduction"
-  bottom: "pool1"
-  top: "loss_pool1"
-  reduction_param {
-    operation: SUM
-  }
-  loss_weight: 1
-}
-layer {
   name: "norm1"
   type: "LRN"
   bottom: "pool1"
@@ -206,6 +196,16 @@ layer {
   type: "ReLU"
   bottom: "conv3"
   top: "conv3"
+}
+layer {
+  name: "loss_relu3"
+  type: "Reduction"
+  bottom: "relu3"
+  top: "loss_relu3"
+  reduction_param {
+    operation: SUM
+  }
+  loss_weight: 1
 }
 layer {
   name: "conv4"
