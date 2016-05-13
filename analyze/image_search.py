@@ -23,7 +23,7 @@ class ImageSearcher:
         order = np.argsort(np.sum(abs(diff_matrix), 1))
         result = []
         for i in range(0, num_hits):
-            return result.append(settings['image_root'] + self.image_list[order[i]])
+            result.append(settings['image_root'] + self.image_list[order[i]])
         return result
 
     def get_path(self, index):
