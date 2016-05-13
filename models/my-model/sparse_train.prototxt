@@ -100,7 +100,9 @@ layer {
 layer {
   name: "loss_pool1"
   type: "Reduction"
-  reduction_param {
+  bottom: "pool1"
+  top: "loss_pool1"
+  param {
     operation: SUM
   }
   loss_weight: 1
