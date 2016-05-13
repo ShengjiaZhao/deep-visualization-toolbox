@@ -6,7 +6,7 @@ import matplotlib
 matplotlib.use('Agg')
 
 if len(sys.argv) > 1:
-    solver_file = sys.argv
+    solver_file = sys.argv[1]
     print("Solver file: " + str(solver_file))
 else:
     print("Usage: caffe_train.py solver_file")
