@@ -21,7 +21,7 @@ solver = caffe.SGDSolver('original_solver.prototxt')
 transformer = caffe.io.Transformer({'data': solver.net.blobs['data'].data.shape})
 data_mean = np.load('ilsvrc12/ilsvrc_2012_mean.npy').mean(1).mean(1)
 transformer.set_transpose('data', (2,0,1))
-transformer.set_mean('data', data_mean - 8) # Subtract a bit more to avoid overflow，　only for visualizatio
+transformer.set_mean('data', data_mean - 8)  # Subtract a bit more to avoid overflow, only for visualization
 transformer.set_channel_swap('data', (2,1,0))
 transformer.set_raw_scale('data', 255.0)
 
