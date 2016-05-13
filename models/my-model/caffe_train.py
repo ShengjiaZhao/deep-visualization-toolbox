@@ -69,13 +69,13 @@ for it in range(niter):
     logger.write(str(it) + " " + str(train_loss[it]) + " " + str(elapsed_time) + "\n")
 
     # Compute average activations once in a while
-    test_logger.write("Average activation: ")
     if it % test_interval == 0:
+        test_logger.write("Average activation: ")
         for sparse_layer in sparse_layers:
             activation = np.average(solver.net.blobs[sparse_layer].data)
             print(str(activation) + "(" + sparse_layer + ")"),
-        test_logger.write(str(activation) + "(" + sparse_layer + ") ")
-    test_logger.write("\n")
+            test_logger.write(str(activation) + "(" + sparse_layer + ") ")
+        test_logger.write("\n")
 
     # run a full test every so often
     # (Caffe can also do this for us and write to a log, but we show here
@@ -90,7 +90,7 @@ for it in range(niter):
                            == solver.test_nets[0].blobs['label'].data)
         test_acc[it // test_interval] = correct / 100.0 / batch_size
         print("Test accuracy: " + str(correct / 100.0 / batch_size))
-        test_logger.write(str(it) + " " + str(correct / 100.0 / batch_size) + "\n")
+        test_logger.write("Test accuracy@iter " + str(it) + " " + str(correct / 100.0 / batch_size) + "\n")
         test_logger.flush()
         logger.flush()
 
