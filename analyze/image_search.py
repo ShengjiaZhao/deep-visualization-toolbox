@@ -25,3 +25,6 @@ class ImageSearcher:
         for i in range(0, num_hits):
             return result.append(settings['image_root'] + self.image_list[order[i]])
         return result
+
+    def get_path(self, index):
+        return settings['image_root'] + self.image_list[index]
