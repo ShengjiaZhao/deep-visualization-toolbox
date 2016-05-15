@@ -12,9 +12,9 @@ def extract_info(filename):
         line = reader.readline().split()
         if len(line) == 0:
             break
-        conv3 = float(line[2].split('('))
-        conv4 = float(line[3].split('('))
-        conv5 = float(line[4].split('('))
+        conv3 = float(line[2].split('(')[0])
+        conv4 = float(line[3].split('(')[0])
+        conv5 = float(line[4].split('(')[0])
         line = reader.readline().split()
         if len(line) == 0:
             break
