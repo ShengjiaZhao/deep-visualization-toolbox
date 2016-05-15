@@ -34,8 +34,11 @@ def extract_info(filename):
             'accuracy': accuracy_seq}
 
 
-def running_avg(seq):
-    sum = 0.0
+def running_avg(seq, smooth=0.9):
+    new_seq = []
+    sum = seq[0]
     for i in range(len(seq)):
-        sum = sum * 0.9 + seq[i]
-        seq[i] = sum
+        sum = sum * smooth + seq[i] * (1-smooth)
+        new_seq.append(sum)
+    return new_seq
+
