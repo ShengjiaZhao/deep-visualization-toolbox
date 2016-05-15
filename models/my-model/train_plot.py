@@ -39,4 +39,3 @@ def running_avg(seq):
     for i in range(len(seq)):
         sum = sum * 0.9 + seq[i]
         seq[i] = sum
-c
