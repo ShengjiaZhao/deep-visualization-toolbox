@@ -27,11 +27,11 @@ def extract_info(filename):
         iteration_seq.append(iteration)
         accuracy_seq.append(accuracy)
 
-    return [{'name': 'conv3', 'value': conv3_seq},
-            {'name': 'conv4', 'value': conv4_seq},
-            {'name': 'conv5', 'value': conv5_seq},
-            {'name': 'iter', 'value': iteration_seq},
-            {'name': 'accuracy', 'value': accuracy_seq}]
+    return {'conv3': conv3_seq,
+            'conv4': conv4_seq,
+            'conv5': conv5_seq,
+            'iter': iteration_seq,
+            'accuracy': accuracy_seq}
 
 
 def running_avg(seq):
