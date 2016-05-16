@@ -83,7 +83,7 @@ class VisualGenerator:
                     actual_width = image_width
                 canvas[plot_y:plot_y+actual_height, plot_x:plot_x+actual_width, :] = \
                         misc.imresize(img, (actual_height, actual_width))
-            self.draw_border(canvas, plot_x, plot_y, width=actual_width, height=actual_height, thickness=2)
+                self.draw_border(canvas, plot_x, plot_y, width=actual_width, height=actual_height, thickness=2)
         return canvas
 
     def visualize_collage_node(self, nodes, include_deconv=False):
@@ -128,24 +128,31 @@ class VisualGenerator:
                 self.draw_border(canvas, plot_x, plot_y, width=image_width, height=image_width, thickness=2)
         return canvas
 
-    def visualize_in_grid(self, nodes):
+    def visualize_in_grid(self, nodes, include_deconv=True, activation_per_node=None):
         """ Visualize a collection of nodes in a evenly spaced grid
         :param nodes: an array of dicts. Each item should contain a layer and index field that specifies the name of
         the layer, and index of node in that layer
         """
-        activation_per_node = int(self.slot_count / len(nodes))
-        if activation_per_node > self.K:
-            activation_per_node = self.K
-        if activation_per_node < 1:
-            activation_per_node = 1
+        if activation_per_node is None:
+            activation_per_node = int(self.slot_count / len(nodes))
+            if activation_per_node > self.K:
+                activation_per_node = self.K
+            if activation_per_node < 1:
+                activation_per_node = 1
         total_slots = len(nodes) * activation_per_node
         ratio = float(self.display_size[1]) / self.display_size[0]
-        column_count = int(math.ceil(math.sqrt(total_slots * ratio / 2)))
+        if include_deconv:
+            column_count = int(math.ceil(math.sqrt(total_slots * ratio / 2)))
+        else:
+            column_count = int(math.ceil(math.sqrt(total_slots * ratio)))
         row_count = int(math.ceil(float(total_slots) / column_count))
-        print(activation_per_node, total_slots, column_count * 2, row_count, row_count * column_count)
+        print(activation_per_node, total_slots, column_count, row_count, row_count * column_count)
 
         canvas = np.zeros(self.display_size + [3], np.uint8)
-        image_width = int(math.floor(float(self.display_size[1]) / column_count / 2))
+        if include_deconv:
+            image_width = int(math.floor(float(self.display_size[1]) / column_count / 2))
+        else:
+            image_width = int(math.floor(float(self.display_size[1]) / column_count))
         image_height = int(math.floor(float(self.display_size[0]) / row_count))
         if image_width > image_height:
             image_width = image_height
@@ -162,17 +169,23 @@ class VisualGenerator:
                 slot_counter += 1
                 max_path = os.path.join(self.node_folder, node['layer'],
                                         'unit_%.4d' % node['index'], 'maxim_%.3d.png' % index)
-                deconv_path = os.path.join(self.node_folder, node['layer'],
-                                           'unit_%.4d' % node['index'], 'deconv_%.3d.png' % index)
+                if include_deconv:
+                    deconv_path = os.path.join(self.node_folder, node['layer'],
+                                               'unit_%.4d' % node['index'], 'deconv_%.3d.png' % index)
                 if not os.path.isfile(max_path):
                     print("Error: " + max_path + " do not exist")
                 else:
-                    canvas[row*image_width:row*image_width+image_width,
-                            col*image_width*2:col*image_width*2+image_width, :] = \
-                            misc.imresize(misc.imread(max_path), (image_width, image_width))
-                if not os.path.isfile(deconv_path):
+                    if include_deconv:
+                        canvas[row*image_width:row*image_width+image_width,
+                                col*image_width*2:col*image_width*2+image_width, :] = \
+                                misc.imresize(misc.imread(max_path), (image_width, image_width))
+                    else:
+                        canvas[row*image_width:row*image_width+image_width,
+                                col*image_width:col*image_width+image_width, :] = \
+                                misc.imresize(misc.imread(max_path), (image_width, image_width))
+                if include_deconv and not os.path.isfile(deconv_path):
                     print("Error: " + deconv_path + " do not exist")
-                else:
+                elif include_deconv:
                     canvas[row*image_width:row*image_width+image_width,
                             col*image_width*2+image_width:(col+1)*image_width*2, :] = \
                             misc.imresize(misc.imread(deconv_path), (image_width, image_width))
@@ -184,7 +197,7 @@ if __name__ == '__main__':
     show_list = []
     for i in range(1, 100):
         show_list.append({'layer': 'conv4', 'index': i, 'coord': [random.random(), random.random()]})
-    #gen.visualize_in_grid(show_list)
+    gen.visualize_in_grid(show_list, include_deconv=False)
     #gen.visualize_collage_node(show_list, True)
 
     img_path_list = ['ILSVRC2012_val_00000610.jpg', 'ILSVRC2012_val_00006491.jpg'] * 10
