@@ -10,8 +10,7 @@ except NameError:
     from config import settings
 
 
-
-class VisuaoytlGenerator:
+class VisualGenerator:
     def __init__(self, K=9):
         """ Create a visualizer by passing in path to the images and path to node visualizations """
         self.image_folder = settings['image_root']
