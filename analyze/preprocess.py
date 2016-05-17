@@ -29,6 +29,11 @@ class Converter:
             range_mat = np.clip(range_mat, 1e-6, np.max(range_mat))
             range_mat = np.tile(np.expand_dims(range_mat, 0), (activation.shape[0], 1))
             activation = np.divide(np.subtract(activation, min_mat), range_mat)
+
+            # Normalize to have unit average
+            activation_sum = np.tile(np.expand_dims(np.sum(activation, 0), 0), (activation.shape[0], 1))
+            activation = np.divide(activation, activation_sum)
+            print(np.sum(activation, 0))
             # print(activation)
             for index in range(activation.shape[0]):
                 max_index = activation[index, :].argsort()[-top_K:]
