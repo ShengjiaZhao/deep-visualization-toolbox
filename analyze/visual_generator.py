@@ -4,17 +4,13 @@ import numpy as np
 from matplotlib import pyplot as plt
 import os, random, time, math
 from scipy import misc
-try:
-    dummy = settings
-except NameError:
-    from config import settings
 
 
 class VisualGenerator:
-    def __init__(self, K=9):
+    def __init__(self, settings_list, K=9):
         """ Create a visualizer by passing in path to the images and path to node visualizations """
-        self.image_folder = settings['image_root']
-        self.node_folder = settings['node_root']
+        self.image_folder = settings_list['image_root']
+        self.node_folder = settings_list['node_root']
         self.K = 9
         self.slot_count = 50
         self.display_size = [1080, 1920]
