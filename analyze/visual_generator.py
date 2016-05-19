@@ -81,7 +81,7 @@ class VisualGenerator:
                     actual_height = image_width
                     actual_width = image_width
                 canvas[plot_y:plot_y+actual_height, plot_x:plot_x+actual_width, :] = \
-                        misc.imresize(img, (actual_height, actual_width))
+                        misc.imresize(img, (actual_height, actual_width))[:, :, :3]
                 self.draw_border(canvas, plot_x, plot_y, width=actual_width, height=actual_height, thickness=2)
         return canvas
 
@@ -119,7 +119,7 @@ class VisualGenerator:
                 else:
                     canvas[plot_y:plot_y+image_width,
                             plot_x+image_width:plot_x+image_width*2, :] = \
-                            misc.imresize(misc.imread(deconv_path), (image_width, image_width))
+                            misc.imresize(misc.imread(deconv_path), (image_width, image_width))[:, :, :3]
 
             if include_deconv:
                 self.draw_border(canvas, plot_x, plot_y, width=image_width*2, height=image_width, thickness=2)
@@ -177,17 +177,17 @@ class VisualGenerator:
                     if include_deconv:
                         canvas[row*image_width:row*image_width+image_width,
                                 col*image_width*2:col*image_width*2+image_width, :] = \
-                                misc.imresize(misc.imread(max_path), (image_width, image_width))
+                                misc.imresize(misc.imread(max_path), (image_width, image_width))[:, :, :3]
                     else:
                         canvas[row*image_width:row*image_width+image_width,
                                 col*image_width:col*image_width+image_width, :] = \
-                                misc.imresize(misc.imread(max_path), (image_width, image_width))
+                                misc.imresize(misc.imread(max_path), (image_width, image_width))[:, :, :3]
                 if include_deconv and not os.path.isfile(deconv_path):
                     print("Error: " + deconv_path + " do not exist")
                 elif include_deconv:
                     canvas[row*image_width:row*image_width+image_width,
                             col*image_width*2+image_width:(col+1)*image_width*2, :] = \
-                            misc.imresize(misc.imread(deconv_path), (image_width, image_width))
+                            misc.imresize(misc.imread(deconv_path), (image_width, image_width))[:, :, :3]
         return canvas
 
 
