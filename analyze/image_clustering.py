@@ -42,14 +42,14 @@ class ImageClustering:
 
         # Select some random images
         num_samples = 5000
-        activation = np.ndarray((num_samples, activation.shape[1]))
+        new_activation = np.ndarray((num_samples, activation.shape[1]))
         new_image_list = []
         indexes = random.sample(range(len(self.image_list)), num_samples)
         for i in range(num_samples):
-            activation[i, :] = activation[indexes[i], :]
+            new_activation[i, :] = activation[indexes[i], :]
             new_image_list.append(self.image_list[indexes[i]])
         self.image_list = new_image_list
-        self.activation = activation
+        self.activation = new_activation
 
     def generate_synthetic(self):
         num_normals = 10
