@@ -68,6 +68,8 @@ class ImageClustering:
             Z,
             leaf_rotation=90.,  # rotates the x axis labels
             leaf_font_size=8.,  # font size for the x axis labels
+            truncate_mode='lastp',  # show only the last p merged clusters
+            p=200,  # show only the last p merged clusters
         )
         plt.show()
 
