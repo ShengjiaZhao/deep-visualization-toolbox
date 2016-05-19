@@ -12,9 +12,8 @@ from visual_generator import VisualGenerator
 
 
 class ImageClustering:
-    def __init__(self, settings=None):
+    def __init__(self, settings=None, layers=['conv5']):
         self.ddata = None
-        return
 
         self.visualizer = VisualGenerator(settings)
         # Read in list of image files
@@ -27,7 +26,10 @@ class ImageClustering:
             self.image_list.append(path.strip())
 
         # Read in conv5 activations
-        activation = np.load(settings['activation_root'] + 'conv5.npy')
+        activation_list = []
+        for layer in layers:
+            activation_list.append(np.load(settings['activation_root'] + layer + '.npy'))
+        activation = np.concatenate(activation_list, 0)
 
         # Normalize
         min_mat = np.tile(np.expand_dims(np.min(activation, 0), 0), (activation.shape[0], 1))
