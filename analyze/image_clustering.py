@@ -12,7 +12,7 @@ from visual_generator import VisualGenerator
 
 
 class ImageClustering:
-    def __init__(self, settings=None, layers=['conv5']):
+    def __init__(self, settings=None, layers=['conv5'], num_samples=5000):
         self.ddata = None
 
         self.visualizer = VisualGenerator(settings)
@@ -41,15 +41,17 @@ class ImageClustering:
         activation = np.clip(activation, 0, 1.0)
 
         # Select some random images
-        num_samples = 5000
-        new_activation = np.ndarray((num_samples, activation.shape[1]))
-        new_image_list = []
-        indexes = random.sample(range(len(self.image_list)), num_samples)
-        for i in range(num_samples):
-            new_activation[i, :] = activation[indexes[i], :]
-            new_image_list.append(self.image_list[indexes[i]])
-        self.image_list = new_image_list
-        self.activation = new_activation
+        if num_samples is not None:
+            new_activation = np.ndarray((num_samples, activation.shape[1]))
+            new_image_list = []
+            indexes = random.sample(range(len(self.image_list)), num_samples)
+            for i in range(num_samples):
+                new_activation[i, :] = activation[indexes[i], :]
+                new_image_list.append(self.image_list[indexes[i]])
+            self.image_list = new_image_list
+            self.activation = new_activation
+        else:
+            self.activation = activation
 
     def generate_synthetic(self):
         num_normals = 10
@@ -102,6 +104,7 @@ class ImageClustering:
                 images_in_cluster = random.sample(images_in_cluster, 100)
             images = [{'path': self.image_list[image_index], 'coord': [random.random(), random.random()]}
                       for image_index in images_in_cluster]
+            fig = plt.figure(figsize=(25, 10))
             plt.imshow(self.visualizer.visualize_collage_image(images))
             plt.show()
             ''' Plot and verify correctness
