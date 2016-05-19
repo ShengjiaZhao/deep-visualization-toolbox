@@ -25,7 +25,7 @@ class ImageClustering:
                 break
             self.image_list.append(path.strip())
 
-        # Read in conv5 activations
+        # Read in activation files
         activation_list = []
         for layer in layers:
             activation_list.append(np.load(settings['activation_root'] + layer + '.npy'))
@@ -38,7 +38,18 @@ class ImageClustering:
         range_mat = np.tile(np.expand_dims(range_mat, 0), (activation.shape[0], 1))
         activation = np.divide(np.subtract(activation, min_mat), range_mat)
         activation -= 0.2
-        self.activation = np.clip(activation, 0, 1.0)
+        activation = np.clip(activation, 0, 1.0)
+
+        # Select some random images
+        num_samples = 5000
+        activation = np.ndarray((num_samples, activation.shape[1]))
+        new_image_list = []
+        indexes = random.sample(range(len(self.image_list)), num_samples)
+        for i in range(num_samples):
+            activation[i, :] = activation[indexes[i], :]
+            new_image_list.append(self.image_list[indexes[i]])
+        self.image_list = new_image_list
+        self.activation = activation
 
     def generate_synthetic(self):
         num_normals = 10
@@ -56,6 +67,7 @@ class ImageClustering:
         data_count = data.shape[0]
         # generate the linkage matrix
         Z = linkage(data, 'ward')
+        print("Computed linkage")
 
         # Plot dendrogram
         fig = plt.figure(figsize=(25, 10))
