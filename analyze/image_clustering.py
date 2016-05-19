@@ -96,13 +96,12 @@ class ImageClustering:
                 else:
                     index_stack.append(int(round(Z[cur_index - data_count, 0])))
                     index_stack.append(int(round(Z[cur_index - data_count, 1])))
-                    print(str(cur_index) + " <-- " + str(Z[cur_index - data_count, 0]) + ", " + str(Z[cur_index - data_count, 1]))
             print(len(images_in_cluster))
             # Sample images if there are less
             if len(images_in_cluster) > 100:
                 random.sample(images_in_cluster, 100)
-            images = [{'path': image_path, 'coord': (random.random(), random.random())}
-                      for image_path in images_in_cluster]
+            images = [{'path': self.image_list[image_index], 'coord': [random.random(), random.random()]}
+                      for image_index in images_in_cluster]
             plt.imshow(self.visualizer.visualize_collage_image(images))
             plt.show()
             ''' Plot and verify correctness
