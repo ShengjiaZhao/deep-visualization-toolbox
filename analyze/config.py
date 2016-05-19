@@ -3,7 +3,7 @@ __author__ = 'shengjia'
 
 settings = {}
 settings2 = {}
-environment = "REMOTE2"
+environment = "BOTH"
 
 if environment == 'REMOTE':
     settings['image_root'] = '/home/ubuntu/sdf/images/'
