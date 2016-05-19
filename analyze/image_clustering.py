@@ -99,7 +99,7 @@ class ImageClustering:
             print(len(images_in_cluster))
             # Sample images if there are less
             if len(images_in_cluster) > 100:
-                random.sample(images_in_cluster, 100)
+                images_in_cluster = random.sample(images_in_cluster, 100)
             images = [{'path': self.image_list[image_index], 'coord': [random.random(), random.random()]}
                       for image_index in images_in_cluster]
             plt.imshow(self.visualizer.visualize_collage_image(images))
