@@ -113,6 +113,23 @@ class ImageClusterDisplay:
         self.y_range = None
         self.mapping = None
 
+        self.text_list = {
+            0: 'all',
+            4: 'non-living',
+            1: 'living or related',
+            11: 'quadruped',
+            6: 'natural',
+            9: 'human related',
+            21: 'people',
+            45: 'dogs',
+            52: 'insect',
+            13: 'water life',
+            19: 'appliances',
+            16: 'indoor scenes',
+            8: 'outdoor scenes',
+            39: 'can fly',
+            12: 'can\'t fly',
+        }
     def display(self):
         self.linkage = np.load(output_path + 'linkage.npy')
         # Plot dendrogram
@@ -145,6 +162,9 @@ class ImageClusterDisplay:
                 plt.annotate(str(self.mapping[index]), (x, y), xytext=(0, -5),
                              textcoords='offset points',
                              va='top', ha='center')
+                if self.mapping[index] in self.text_list:
+                    plt.annotate(self.text_list[self.mapping[index]], (x, y), xytext=(0, 2), textcoords='offset points',
+                                 va='bottom', ha='center')
 
         self.x_range = np.max(self.ddata['icoord']) - np.min(self.ddata['icoord'])
         self.y_range = np.max(self.ddata['dcoord']) - np.min(self.ddata['dcoord'])
