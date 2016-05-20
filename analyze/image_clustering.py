@@ -6,12 +6,16 @@ from scipy.cluster.hierarchy import dendrogram, linkage
 import numpy as np
 import math
 # generate two clusters: a with 100 points, b with 50:
-import random
+import random, os
 from visual_generator import VisualGenerator
 #np.random.seed(4711)  # for repeatability of this tutorial
 
+output_path = 'cluster_output/'
+
 
 class ImageClustering:
+    """ Backend class for computing the image clusters
+    """
     def __init__(self, settings=None, layers=['conv5'], num_samples=5000):
         self.ddata = None
 
@@ -69,6 +73,9 @@ class ImageClustering:
         data_count = data.shape[0]
         # generate the linkage matrix
         Z = linkage(data, 'ward')
+        if not os.path.isdir(output_path):
+            os.mkdir(output_path)
+        np.save(output_path + 'linkage', Z)
         print("Computed linkage")
 
         # Plot dendrogram
@@ -105,8 +112,10 @@ class ImageClustering:
             images = [{'path': self.image_list[image_index], 'coord': [random.random(), random.random()]}
                       for image_index in images_in_cluster]
             fig = plt.figure(figsize=(25, 10))
-            plt.imshow(self.visualizer.visualize_collage_image(images))
-            plt.show()
+            img = self.visualizer.visualize_collage_image(images)
+            np.save(output_path + 'cluster' + str(index), img)
+            print("Processed img " + str(index))
+            #plt.show()
             ''' Plot and verify correctness
             point_list_x = [data[index, 0] for index in images_in_cluster]
             point_list_y = [data[index, 1] for index in images_in_cluster]
@@ -123,6 +132,26 @@ class ImageClustering:
 
     def plot(self, data):
         plt.scatter(data[:,0], data[:,1])
+        plt.show()
+
+
+class ImageClusterDisplay:
+    def display(self):
+        Z = np.load(output_path + 'linkage.npz')
+        # Plot dendrogram
+        fig = plt.figure(figsize=(25, 10))
+        # self.ax = fig.add_subplot(1, 1, 1)
+        # cid = fig.canvas.mpl_connect('button_press_event', self.onclick)
+        plt.title('Hierarchical Clustering Dendrogram')
+        plt.xlabel('sample index')
+        plt.ylabel('distance')
+        self.ddata = dendrogram(
+            Z,
+            leaf_rotation=90.,  # rotates the x axis labels
+            leaf_font_size=8.,  # font size for the x axis labels
+            truncate_mode='lastp',  # show only the last p merged clusters
+            p=200,  # show only the last p merged clusters
+        )
         plt.show()
 
     # Event Handler
