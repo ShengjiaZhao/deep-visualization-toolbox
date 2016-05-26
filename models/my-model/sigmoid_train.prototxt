@@ -121,7 +121,7 @@ layer {
 }
 layer {
   name: "scale1_2"
-  type: Scale"
+  type: "Scale"
   bottom: "bias1"
   bottom: "scale_param2"
   top: "scale1_2"
