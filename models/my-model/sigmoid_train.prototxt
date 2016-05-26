@@ -93,7 +93,7 @@ layer {
 layer {
   name: "scale_param2"
   type: "DummyData"
-  top: "scale_param1"
+  top: "scale_param2"
   dummy_data_param {
     shape {
       dim: 0
@@ -118,6 +118,13 @@ layer {
   type: "Bias"
   bottom: "sigmoid1"
   top: "bias1"
+  bias_parameter {
+    num_axes: 0
+    filler {
+      type: "constant"
+      value: 0.5
+    }
+  }
 }
 layer {
   name: "scale1_2"
