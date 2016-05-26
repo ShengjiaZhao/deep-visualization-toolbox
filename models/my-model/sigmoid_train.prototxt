@@ -118,7 +118,7 @@ layer {
   type: "Bias"
   bottom: "sigmoid1"
   top: "bias1"
-  bias_parameter {
+  bias_param {
     num_axes: 0
     filler {
       type: "constant"
