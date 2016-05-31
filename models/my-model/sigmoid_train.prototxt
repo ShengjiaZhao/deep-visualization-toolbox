@@ -274,41 +274,6 @@ layer {
   top: "conv3"
 }
 layer {
-  name: "conv3_loss_pool"
-  type: "Pooling"
-  bottom: "conv3"
-  top: "conv3_loss_pool"
-  include {
-    phase: TRAIN
-  }
-  pooling_param {
-    pool: MAX
-    kernel_size: 13
-  }
-}
-layer {
-  name: "conv3_loss_sig"
-  type: "Sigmoid"
-  bottom: "conv3_loss_pool"
-  top: "conv3_loss_sig"
-  include {
-    phase: TRAIN
-  }
-}
-layer {
-  name: "conv3_loss"
-  type: "Reduction"
-  bottom: "conv3_loss_sig"
-  top: "conv3_loss"
-  include {
-    phase: TRAIN
-  }
-  reduction_param {
-    operation: MEAN
-  }
-  loss_weight: 1.0
-}
-layer {
   name: "conv4"
   type: "Convolution"
   bottom: "conv3"
@@ -343,41 +308,6 @@ layer {
   top: "conv4"
 }
 layer {
-  name: "conv4_loss_pool"
-  type: "Pooling"
-  bottom: "conv4"
-  top: "conv4_loss_pool"
-  include {
-    phase: TRAIN
-  }
-  pooling_param {
-    pool: MAX
-    kernel_size: 13
-  }
-}
-layer {
-  name: "conv4_loss_sig"
-  type: "Sigmoid"
-  bottom: "conv4_loss_pool"
-  top: "conv4_loss_sig"
-  include {
-    phase: TRAIN
-  }
-}
-layer {
-  name: "conv4_loss"
-  type: "Reduction"
-  bottom: "conv4_loss_sig"
-  top: "conv4_loss"
-  include {
-    phase: TRAIN
-  }
-  reduction_param {
-    operation: MEAN
-  }
-  loss_weight: 1.0
-}
-layer {
   name: "conv5"
   type: "Convolution"
   bottom: "conv4"
@@ -410,41 +340,6 @@ layer {
   type: "ReLU"
   bottom: "conv5"
   top: "conv5"
-}
-layer {
-  name: "conv5_loss_pool"
-  type: "Pooling"
-  bottom: "conv5"
-  top: "conv5_loss_pool"
-  include {
-    phase: TRAIN
-  }
-  pooling_param {
-    pool: MAX
-    kernel_size: 13
-  }
-}
-layer {
-  name: "conv5_loss_sig"
-  type: "Sigmoid"
-  bottom: "conv5_loss_pool"
-  top: "conv5_loss_sig"
-  include {
-    phase: TRAIN
-  }
-}
-layer {
-  name: "conv5_loss"
-  type: "Reduction"
-  bottom: "conv5_loss_sig"
-  top: "conv5_loss"
-  include {
-    phase: TRAIN
-  }
-  reduction_param {
-    operation: MEAN
-  }
-  loss_weight: 1.0
 }
 layer {
   name: "pool5"
