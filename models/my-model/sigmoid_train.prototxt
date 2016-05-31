@@ -213,15 +213,60 @@ layer {
   }
 }
 layer {
+  name: "scale2_1"
+  type: "Scale"
+  bottom: "conv2"
+  top: "scale2_1"
+  scale_param {
+    num_axes: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+}
+layer {
+  name: "sigmoid2"
+  type: "Sigmoid"
+  bottom: "scale2_1"
+  top: "sigmoid2"
+}
+layer {
+  name: "bias2"
+  type: "Bias"
+  bottom: "sigmoid2"
+  top: "bias2"
+  bias_param {
+    num_axes: 0
+    filler {
+      type: "constant"
+      value: -0.5
+    }
+  }
+}
+layer {
+  name: "scale2_2"
+  type: "Scale"
+  bottom: "bias2"
+  top: "scale2_2"
+  scale_param {
+    num_axes: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+}
+layer {
   name: "relu2"
   type: "ReLU"
-  bottom: "conv2"
-  top: "conv2"
+  bottom: "scale2_2"
+  top: "relu2"
 }
 layer {
   name: "pool2"
   type: "Pooling"
-  bottom: "conv2"
+  bottom: "relu2"
   top: "pool2"
   pooling_param {
     pool: MAX
