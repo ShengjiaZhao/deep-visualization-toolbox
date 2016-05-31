@@ -22,7 +22,7 @@ layer {
 #  }
   data_param {
     source: "/home/ubuntu/sdf/imagenet/ilsvrc12_train_lmdb"
-    batch_size: 256
+    batch_size: 128
     backend: LMDB
   }
 }
