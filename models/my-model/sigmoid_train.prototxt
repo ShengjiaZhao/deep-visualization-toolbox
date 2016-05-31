@@ -313,15 +313,60 @@ layer {
   }
 }
 layer {
+  name: "scale3_1"
+  type: "Scale"
+  bottom: "conv3"
+  top: "scale3_1"
+  scale_param {
+    num_axes: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+}
+layer {
+  name: "sigmoid3"
+  type: "Sigmoid"
+  bottom: "scale3_1"
+  top: "sigmoid3"
+}
+layer {
+  name: "bias3"
+  type: "Bias"
+  bottom: "sigmoid3"
+  top: "bias3"
+  bias_param {
+    num_axes: 0
+    filler {
+      type: "constant"
+      value: -0.5
+    }
+  }
+}
+layer {
+  name: "scale3_2"
+  type: "Scale"
+  bottom: "bias3"
+  top: "scale3_2"
+  scale_param {
+    num_axes: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+}
+layer {
   name: "relu3"
   type: "ReLU"
-  bottom: "conv3"
-  top: "conv3"
+  bottom: "scale3_2"
+  top: "relu3"
 }
 layer {
   name: "conv4"
   type: "Convolution"
-  bottom: "conv3"
+  bottom: "relu3"
   top: "conv4"
   param {
     lr_mult: 1
@@ -347,15 +392,60 @@ layer {
   }
 }
 layer {
+  name: "scale4_1"
+  type: "Scale"
+  bottom: "conv4"
+  top: "scale4_1"
+  scale_param {
+    num_axes: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+}
+layer {
+  name: "sigmoid4"
+  type: "Sigmoid"
+  bottom: "scale4_1"
+  top: "sigmoid4"
+}
+layer {
+  name: "bias4"
+  type: "Bias"
+  bottom: "sigmoid4"
+  top: "bias4"
+  bias_param {
+    num_axes: 0
+    filler {
+      type: "constant"
+      value: -0.5
+    }
+  }
+}
+layer {
+  name: "scale4_2"
+  type: "Scale"
+  bottom: "bias4"
+  top: "scale4_2"
+  scale_param {
+    num_axes: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+}
+layer {
   name: "relu4"
   type: "ReLU"
-  bottom: "conv4"
-  top: "conv4"
+  bottom: "scale4_2"
+  top: "relu4"
 }
 layer {
   name: "conv5"
   type: "Convolution"
-  bottom: "conv4"
+  bottom: "relu4"
   top: "conv5"
   param {
     lr_mult: 1
@@ -381,15 +471,60 @@ layer {
   }
 }
 layer {
+  name: "scale5_1"
+  type: "Scale"
+  bottom: "conv5"
+  top: "scale5_1"
+  scale_param {
+    num_axes: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+}
+layer {
+  name: "sigmoid5"
+  type: "Sigmoid"
+  bottom: "scale5_1"
+  top: "sigmoid5"
+}
+layer {
+  name: "bias5"
+  type: "Bias"
+  bottom: "sigmoid5"
+  top: "bias5"
+  bias_param {
+    num_axes: 0
+    filler {
+      type: "constant"
+      value: -0.5
+    }
+  }
+}
+layer {
+  name: "scale5_2"
+  type: "Scale"
+  bottom: "bias5"
+  top: "scale5_2"
+  scale_param {
+    num_axes: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+}
+layer {
   name: "relu5"
   type: "ReLU"
-  bottom: "conv5"
-  top: "conv5"
+  bottom: "scale5_2"
+  top: "relu5"
 }
 layer {
   name: "pool5"
   type: "Pooling"
-  bottom: "conv5"
+  bottom: "relu5"
   top: "pool5"
   pooling_param {
     pool: MAX
