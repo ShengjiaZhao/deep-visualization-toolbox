@@ -127,12 +127,12 @@ layer {
   name: "sigmoid1"
   type: "Sigmoid"
   bottom: "scale1_1"
-  top: "sigmoid1"
+  top: "scale1_1"
 }
 layer {
   name: "bias1"
   type: "Bias"
-  bottom: "sigmoid1"
+  bottom: "scale1_1"
   top: "bias1"
   bias_param {
     num_axes: 0
@@ -229,12 +229,12 @@ layer {
   name: "sigmoid2"
   type: "Sigmoid"
   bottom: "scale2_1"
-  top: "sigmoid2"
+  top: "scale2_1"
 }
 layer {
   name: "bias2"
   type: "Bias"
-  bottom: "sigmoid2"
+  bottom: "scale2_1"
   top: "bias2"
   bias_param {
     num_axes: 0
@@ -329,12 +329,12 @@ layer {
   name: "sigmoid3"
   type: "Sigmoid"
   bottom: "scale3_1"
-  top: "sigmoid3"
+  top: "scale3_1"
 }
 layer {
   name: "bias3"
   type: "Bias"
-  bottom: "sigmoid3"
+  bottom: "scale3_1"
   top: "bias3"
   bias_param {
     num_axes: 0
@@ -408,12 +408,12 @@ layer {
   name: "sigmoid4"
   type: "Sigmoid"
   bottom: "scale4_1"
-  top: "sigmoid4"
+  top: "scale4_1"
 }
 layer {
   name: "bias4"
   type: "Bias"
-  bottom: "sigmoid4"
+  bottom: "scale4_1"
   top: "bias4"
   bias_param {
     num_axes: 0
@@ -487,12 +487,12 @@ layer {
   name: "sigmoid5"
   type: "Sigmoid"
   bottom: "scale5_1"
-  top: "sigmoid5"
+  top: "scale5_1"
 }
 layer {
   name: "bias5"
   type: "Bias"
-  bottom: "sigmoid5"
+  bottom: "scale5_1"
   top: "bias5"
   bias_param {
     num_axes: 0
@@ -574,12 +574,12 @@ layer {
   name: "sigmoid6"
   type: "Sigmoid"
   bottom: "scale6_1"
-  top: "sigmoid6"
+  top: "scale6_1"
 }
 layer {
   name: "bias6"
   type: "Bias"
-  bottom: "sigmoid6"
+  bottom: "scale6_1"
   top: "bias6"
   bias_param {
     num_axes: 0
@@ -659,12 +659,12 @@ layer {
   name: "sigmoid7"
   type: "Sigmoid"
   bottom: "scale7_1"
-  top: "sigmoid7"
+  top: "scale7_1"
 }
 layer {
   name: "bias7"
   type: "Bias"
-  bottom: "sigmoid7"
+  bottom: "scale7_1"
   top: "bias7"
   bias_param {
     num_axes: 0
