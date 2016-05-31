@@ -558,16 +558,61 @@ layer {
   }
 }
 layer {
+  name: "scale6_1"
+  type: "Scale"
+  bottom: "fc6"
+  top: "scale6_1"
+  scale_param {
+    num_axes: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+}
+layer {
+  name: "sigmoid6"
+  type: "Sigmoid"
+  bottom: "scale6_1"
+  top: "sigmoid6"
+}
+layer {
+  name: "bias6"
+  type: "Bias"
+  bottom: "sigmoid6"
+  top: "bias6"
+  bias_param {
+    num_axes: 0
+    filler {
+      type: "constant"
+      value: -0.5
+    }
+  }
+}
+layer {
+  name: "scale6_2"
+  type: "Scale"
+  bottom: "bias6"
+  top: "scale6_2"
+  scale_param {
+    num_axes: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+}
+layer {
   name: "relu6"
   type: "ReLU"
-  bottom: "fc6"
-  top: "fc6"
+  bottom: "scale6_2"
+  top: "relu6"
 }
 layer {
   name: "drop6"
   type: "Dropout"
-  bottom: "fc6"
-  top: "fc6"
+  bottom: "relu6"
+  top: "relu6"
   dropout_param {
     dropout_ratio: 0.5
   }
@@ -575,7 +620,7 @@ layer {
 layer {
   name: "fc7"
   type: "InnerProduct"
-  bottom: "fc6"
+  bottom: "relu6"
   top: "fc7"
   param {
     lr_mult: 1
@@ -598,16 +643,61 @@ layer {
   }
 }
 layer {
+  name: "scale7_1"
+  type: "Scale"
+  bottom: "fc7"
+  top: "scale7_1"
+  scale_param {
+    num_axes: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+}
+layer {
+  name: "sigmoid7"
+  type: "Sigmoid"
+  bottom: "scale7_1"
+  top: "sigmoid7"
+}
+layer {
+  name: "bias7"
+  type: "Bias"
+  bottom: "sigmoid7"
+  top: "bias7"
+  bias_param {
+    num_axes: 0
+    filler {
+      type: "constant"
+      value: -0.5
+    }
+  }
+}
+layer {
+  name: "scale7_2"
+  type: "Scale"
+  bottom: "bias7"
+  top: "scale7_2"
+  scale_param {
+    num_axes: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+}
+layer {
   name: "relu7"
   type: "ReLU"
-  bottom: "fc7"
+  bottom: "scale7_2"
   top: "fc7"
 }
 layer {
   name: "drop7"
   type: "Dropout"
-  bottom: "fc7"
-  top: "fc7"
+  bottom: "relu7"
+  top: "relu7"
   dropout_param {
     dropout_ratio: 0.5
   }
@@ -615,7 +705,7 @@ layer {
 layer {
   name: "fc8"
   type: "InnerProduct"
-  bottom: "fc7"
+  bottom: "relu7"
   top: "fc8"
   param {
     lr_mult: 1
