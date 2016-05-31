@@ -691,7 +691,7 @@ layer {
   name: "relu7"
   type: "ReLU"
   bottom: "scale7_2"
-  top: "fc7"
+  top: "relu7"
 }
 layer {
   name: "drop7"
