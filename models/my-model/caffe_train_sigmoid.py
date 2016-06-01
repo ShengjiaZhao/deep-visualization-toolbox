@@ -83,7 +83,7 @@ for it in range(niter):
     train_loss[it] = solver.net.blobs['loss'].data
     print("Iter " + str(it) + " -- Train loss: " + str(train_loss[it]) +
           " -- Time used: " + str(elapsed_time) + "s -- Total time: " + str(time.time() - begin_time) + "s")
-    logger.write(str(it) + " " + str(train_loss[it]) + " " + str(elapsed_time) + "\n")
+    logger.write("Iter " + str(it) + " Ratio " + str(sigmoid_ratio) + " Loss " + str(train_loss[it]) + " Time " + str(elapsed_time) + "\n")
 
     # run a full test every so often
     # (Caffe can also do this for us and write to a log, but we show here
