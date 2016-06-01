@@ -141,6 +141,10 @@ layer {
       value: -0.5
     }
   }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
 }
 layer {
   name: "scale1_2"
@@ -243,6 +247,10 @@ layer {
       value: -0.5
     }
   }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
 }
 layer {
   name: "scale2_2"
@@ -343,6 +351,10 @@ layer {
       value: -0.5
     }
   }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
 }
 layer {
   name: "scale3_2"
@@ -422,6 +434,10 @@ layer {
       value: -0.5
     }
   }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
 }
 layer {
   name: "scale4_2"
@@ -500,6 +516,10 @@ layer {
       type: "constant"
       value: -0.5
     }
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
   }
 }
 layer {
@@ -588,6 +608,10 @@ layer {
       value: -0.5
     }
   }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
 }
 layer {
   name: "scale6_2"
@@ -672,6 +696,10 @@ layer {
       type: "constant"
       value: -0.5
     }
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
   }
 }
 layer {
