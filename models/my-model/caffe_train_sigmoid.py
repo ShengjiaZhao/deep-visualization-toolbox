@@ -77,7 +77,7 @@ for it in range(niter):
     solver.step(1)  # SGD by Caffe
     elapsed_time = time.time() - step_time
 
-    if it % 500 == 0 and sigmoid_ratio > 1.0:
+    if it % 500 == 0 and sigmoid_ratio > 0.5:
         sigmoid_ratio *= 0.8
         set_ratio(sigmoid_ratio)
 

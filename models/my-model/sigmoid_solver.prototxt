@@ -1,7 +1,7 @@
 net: "sigmoid_train.prototxt"
 test_iter: 100
 test_interval: 1000
-base_lr: 0.0001
+base_lr: 0.001
 lr_policy: "step"
 gamma: 0.5
 stepsize: 2000
