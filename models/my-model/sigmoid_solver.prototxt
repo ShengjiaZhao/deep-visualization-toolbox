@@ -4,7 +4,7 @@ test_interval: 1000
 base_lr: 0.001
 lr_policy: "step"
 gamma: 0.5
-stepsize: 2000
+stepsize: 4000
 display: 20
 max_iter: 45000
 momentum: 0.9
