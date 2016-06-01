@@ -21,16 +21,16 @@ os.chdir('/home/ubuntu/deep-visualization-toolbox/models/my-model')
 
 
 def set_ratio(ratio):
-    solver.net.params['scale1_1'][0].data[...] = 1.0 / ratio
-    solver.net.params['scale1_2'][0].data[...] = ratio * 4
-    solver.net.params['scale2_1'][0].data[...] = 1.0 / ratio
-    solver.net.params['scale2_2'][0].data[...] = ratio * 4
-    solver.net.params['scale3_1'][0].data[...] = 1.0 / ratio
-    solver.net.params['scale3_2'][0].data[...] = ratio * 4
-    solver.net.params['scale4_1'][0].data[...] = 1.0 / ratio
-    solver.net.params['scale4_2'][0].data[...] = ratio * 4
-    solver.net.params['scale5_1'][0].data[...] = 1.0 / ratio
-    solver.net.params['scale5_2'][0].data[...] = ratio * 4
+    # solver.net.params['scale1_1'][0].data[...] = 1.0 / ratio
+    # solver.net.params['scale1_2'][0].data[...] = ratio * 4
+    # solver.net.params['scale2_1'][0].data[...] = 1.0 / ratio
+    # solver.net.params['scale2_2'][0].data[...] = ratio * 4
+    # solver.net.params['scale3_1'][0].data[...] = 1.0 / ratio
+    # solver.net.params['scale3_2'][0].data[...] = ratio * 4
+    # solver.net.params['scale4_1'][0].data[...] = 1.0 / ratio
+    # solver.net.params['scale4_2'][0].data[...] = ratio * 4
+    # solver.net.params['scale5_1'][0].data[...] = 1.0 / ratio
+    # solver.net.params['scale5_2'][0].data[...] = ratio * 4
     solver.net.params['scale6_1'][0].data[...] = 1.0 / ratio
     solver.net.params['scale6_2'][0].data[...] = ratio * 4
     solver.net.params['scale7_1'][0].data[...] = 1.0 / ratio
