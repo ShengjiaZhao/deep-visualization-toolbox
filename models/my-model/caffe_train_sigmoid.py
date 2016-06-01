@@ -19,11 +19,6 @@ pretrained_model = caffe_root + 'models/bvlc_reference_caffenet/bvlc_reference_c
 import os
 os.chdir('/home/ubuntu/deep-visualization-toolbox/models/my-model')
 
-# load the solver and create train and test nets
-solver = None  # ignore this workaround for lmdb data (can't instantiate two solvers on the same data)
-solver = caffe.SGDSolver(solver_file)
-solver.net.copy_from(pretrained_model)
-sigmoid_ratio = 1000
 
 def set_ratio(ratio):
     solver.net.params['scale1_1'][0].data[...] = 1.0 / ratio
@@ -40,6 +35,13 @@ def set_ratio(ratio):
     solver.net.params['scale6_2'][0].data[...] = ratio * 4
     solver.net.params['scale7_1'][0].data[...] = 1.0 / ratio
     solver.net.params['scale7_2'][0].data[...] = ratio * 4
+
+# load the solver and create train and test nets
+solver = None  # ignore this workaround for lmdb data (can't instantiate two solvers on the same data)
+solver = caffe.SGDSolver(solver_file)
+solver.net.copy_from(pretrained_model)
+sigmoid_ratio = 1000
+set_ratio(sigmoid_ratio)
 
 
 transformer = caffe.io.Transformer({'data': solver.net.blobs['data'].data.shape})
