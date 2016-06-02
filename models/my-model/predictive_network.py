@@ -1,6 +1,6 @@
 __author__ = 'shengjia'
 
-import time
+import time, os
 import matplotlib
 # matplotlib.use('Agg')
 from matplotlib import pyplot as plt
@@ -15,7 +15,7 @@ sess.as_default()
 
 
 def state_variable(shape, name=None):
-    initial = tf.truncated_normal(shape, stddev=0.1)
+    initial = tf.nn.relu(tf.truncated_normal(shape, stddev=0.1))
     if name is not None:
         return tf.Variable(initial, name=name)
     else:
@@ -62,40 +62,40 @@ train_phase = tf.placeholder(tf.bool, shape=[batch_size])
 
 with tf.name_scope("fc1"):
     fc1_input = tf.select(train_phase, y_ref, y_pred)
-    W_fc1 = weight_variable([10, 1024])
-    b_fc1 = bias_variable([1024])
-    fc1_var = state_variable([batch_size, 1024], name='fc1_var')
+    W_fc1 = weight_variable([10, 256])
+    b_fc1 = bias_variable([256])
+    fc1_var = state_variable([batch_size, 256], name='fc1_var')
 
     fc1_relu = tf.nn.relu(tf.matmul(fc1_input, W_fc1, name='fc1') + b_fc1, name='fc1_relu')
-    fc1_loss = tf.reduce_sum(tf.square(tf.sub(fc1_var, fc1_relu)), name='fc1_loss')
+    fc1_loss = tf.reduce_sum(tf.square(tf.sub(fc1_var, fc1_relu)), name='fc1_loss') / (256*batch_size)
 
 with tf.name_scope("fc2"):
-    W_fc2 = weight_variable([1024, 7 * 7 * 64])
-    b_fc2 = bias_variable([7 * 7 * 64])
-    fc2_var = state_variable([batch_size, 7 * 7 * 64], name='fc2_var')
+    W_fc2 = weight_variable([256, 7 * 7 * 32])
+    b_fc2 = bias_variable([7 * 7 * 32])
+    fc2_var = state_variable([batch_size, 7 * 7 * 32], name='fc2_var')
 
     fc2_relu = tf.nn.relu(tf.matmul(fc1_var, W_fc2, name='fc2') + b_fc2, name='fc2_relu')
-    fc2_loss = tf.reduce_sum(tf.square(tf.sub(fc2_var, fc2_relu)), name='fc2_loss')
+    fc2_loss = tf.reduce_sum(tf.square(tf.sub(fc2_var, fc2_relu)), name='fc2_loss') / (7*7*32*batch_size)
 
 with tf.name_scope('conv1'):
-    conv1_in = unpool(tf.reshape(fc2_var, [batch_size, 7, 7, 64]), name='conv1_unpool')
-    W_conv1 = weight_variable([5, 5, 64, 32])
-    b_conv1 = bias_variable([32])
-    conv1_var = state_variable([batch_size, 14, 14, 32], name='conv1_var')
+    conv1_in = unpool(tf.reshape(fc2_var, [batch_size, 7, 7, 32]), name='conv1_unpool')
+    W_conv1 = weight_variable([5, 5, 32, 24])
+    b_conv1 = bias_variable([24])
+    conv1_var = state_variable([batch_size, 14, 14, 24], name='conv1_var')
 
     conv1_relu = tf.nn.relu(tf.nn.conv2d(conv1_in, W_conv1, strides=[1, 1, 1, 1], padding='SAME') + b_conv1)
-    conv1_loss = tf.reduce_sum(tf.square(tf.sub(conv1_var, conv1_relu)))
+    conv1_loss = tf.reduce_sum(tf.square(tf.sub(conv1_var, conv1_relu)), name='conv1_loss') / (14*14*24*batch_size)
 
 with tf.name_scope('conv2'):
     conv2_in = unpool(conv1_var, name='conv2_unpool')
-    W_conv2 = weight_variable([5, 5, 32, 1])
+    W_conv2 = weight_variable([5, 5, 24, 1])
     b_conv2 = bias_variable([1])
     x_image = tf.reshape(x, [-1, 28, 28, 1])
 
     conv2_relu = tf.nn.relu(tf.nn.conv2d(conv2_in, W_conv2, strides=[1, 1, 1, 1], padding='SAME') + b_conv2)
-    conv2_loss = tf.reduce_sum(tf.square(tf.sub(x_image, conv2_relu)))
+    conv2_loss = tf.reduce_sum(tf.square(tf.sub(x_image, conv2_relu)), name='conv2_loss') / (28*28*batch_size)
 
-total_loss = fc1_loss + fc2_loss + conv1_loss + 0.5 * conv2_loss
+total_loss = fc1_loss + fc2_loss + conv1_loss + conv2_loss
 with tf.name_scope('summary'):
     tf.scalar_summary('fc1_loss', fc1_loss)
     tf.scalar_summary('fc2_loss', fc2_loss)
@@ -103,18 +103,32 @@ with tf.name_scope('summary'):
     tf.scalar_summary('conv2_loss', conv2_loss)
     tf.scalar_summary('total_loss', total_loss)
 
-e_step = tf.train.AdamOptimizer(1e-2).minimize(total_loss, var_list=[fc1_var, fc2_var, conv1_var], name='E_optim')
-m_step = tf.train.AdamOptimizer(1e-2).minimize(total_loss,
-                                               var_list=[W_fc1, b_fc1, W_fc2, b_fc2, W_conv1, b_conv1, W_conv2, b_conv2],
-                                               name='M_optim')
-e_step_test = tf.train.AdamOptimizer(1e-2).minimize(total_loss, var_list = [fc1_var, fc2_var, conv1_var, y_weight_var],
-                                                    name='E_optim_test')
+e_learning_rate = tf.placeholder(tf.float32, shape=[])
+e_step = tf.train.GradientDescentOptimizer(e_learning_rate).minimize(total_loss,
+                                                                     var_list=[fc1_var, fc2_var, conv1_var],
+                                                                     name='E_optim')
+m_learning_rate = tf.placeholder(tf.float32, shape=[])
+m_step = tf.train.GradientDescentOptimizer(m_learning_rate).minimize(total_loss,
+                                           var_list=[W_fc1, b_fc1, W_fc2, b_fc2, W_conv1, b_conv1, W_conv2, b_conv2],
+                                           name='M_optim')
 
-sess.run(tf.initialize_all_variables())
+e_step_test = tf.train.GradientDescentOptimizer(e_learning_rate).minimize(total_loss,
+                                                                          var_list=[fc1_var, fc2_var, conv1_var, y_weight_var],
+                                                                          name='E_optim_test')
 summary_op = tf.merge_all_summaries()
 train_writer = tf.train.SummaryWriter('log/generative', sess.graph)
 
-e_step_size = 10
+sess.run(tf.initialize_all_variables())
+
+saver = tf.train.Saver()
+if os.path.isfile('model.ckpt'):
+    saver.restore(sess, "model.ckpt")
+    print("Loading previous network")
+
+e_lr = 0.01
+m_lr = 0.01
+test_lr = 0.01
+e_step_size = 20
 m_step_size = 1000
 test_step_size = 100
 
@@ -124,12 +138,16 @@ def reinitialize():
     sess.run(conv1_var.initializer)
     sess.run(y_weight_var.initializer)
 
+batch = mnist.train.next_batch(batch_size)
 
 def test_network():
-    test_batch = mnist.test.next_batch(batch_size)
+    test_batch = batch #mnist.test.next_batch(batch_size)
     reinitialize()
+    test_lr = 0.01
     for e_iter in range(0, test_step_size):
-        sess.run(e_step_test, feed_dict={x: test_batch[0], y_ref: test_batch[1], train_phase: [False]*batch_size})
+        sess.run(e_step_test, feed_dict={x: test_batch[0], y_ref: test_batch[1],
+                                         train_phase: [False]*batch_size, e_learning_rate: test_lr})
+        test_lr *= 0.9
     truth = np.argmax(test_batch[1], 1)
     pred = np.argmax(sess.run(y_pred), 1)
 
@@ -141,21 +159,28 @@ def test_network():
 
 
 for m_iter in range(m_step_size):
-    batch = mnist.train.next_batch(batch_size)
     reinitialize()
+    e_lr = 0.01
     for e_iter in range(0, e_step_size):
-        sess.run(e_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [True]*batch_size})
+        sess.run(e_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [True]*batch_size, e_learning_rate: e_lr})
+        e_lr *= 0.9
     for e_iter in range(0, 2):
-        sess.run(e_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [True]*batch_size})
-        sess.run(m_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [True]*batch_size})
-    summary_str = sess.run(summary_op, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [True]*batch_size})
+        sess.run(e_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [True]*batch_size, e_learning_rate: e_lr})
+        sess.run(m_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [True]*batch_size, m_learning_rate: m_lr})
+    summary_str = sess.run(summary_op, feed_dict={x: batch[0], y_ref: batch[1],
+                                                  train_phase: [True]*batch_size})
     train_writer.add_summary(summary_str, m_iter)
     print("Iteration M: " + str(m_iter))
     train_writer.flush()
-    if m_iter != 0 and m_iter % 10 == 0:
+    #if m_iter % 10 == 0:
+    m_lr *= 0.95
+    if m_iter != 0 and m_iter % 20 == 0:
         test_network()
-    if m_iter % 100 == 0 and e_step_size < 30:
+    if m_iter % 20 == 0 and e_step_size < 30:
         e_step_size += 1
+    if m_iter % 50 == 0 and m_iter != 0:
+        save_path = saver.save(sess, "model.ckpt")
 
 
-
+def correctness_test():
+    pass
