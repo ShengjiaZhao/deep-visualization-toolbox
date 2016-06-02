@@ -48,17 +48,24 @@ def unpool(value, name='unpool'):
         out = tf.reshape(out, out_size, name=scope)
     return out
 
-batch_size = 20
+batch_size = 200
 
 x = tf.placeholder(tf.float32, shape=[batch_size, 784])
 y_ref = tf.placeholder(tf.float32, shape=[batch_size, 10])  # Each batch contains 20 samples
 
+with tf.name_scope('test'):
+    y_weight_var = state_variable([batch_size, 10], name='y_weight')
+    y_pred = tf.nn.softmax(y_weight_var, name='prediction')
+
+train_phase = tf.placeholder(tf.bool, shape=[batch_size])
+
 with tf.name_scope("fc1"):
+    fc1_input = tf.select(train_phase, y_ref, y_pred)
     W_fc1 = weight_variable([10, 1024])
     b_fc1 = bias_variable([1024])
     fc1_var = state_variable([batch_size, 1024], name='fc1_var')
 
-    fc1_relu = tf.nn.relu(tf.matmul(y_ref, W_fc1, name='fc1') + b_fc1, name='fc1_relu')
+    fc1_relu = tf.nn.relu(tf.matmul(fc1_input, W_fc1, name='fc1') + b_fc1, name='fc1_relu')
     fc1_loss = tf.reduce_sum(tf.square(tf.sub(fc1_var, fc1_relu)), name='fc1_loss')
 
 with tf.name_scope("fc2"):
@@ -87,9 +94,7 @@ with tf.name_scope('conv2'):
     conv2_relu = tf.nn.relu(tf.nn.conv2d(conv2_in, W_conv2, strides=[1, 1, 1, 1], padding='SAME') + b_conv2)
     conv2_loss = tf.reduce_sum(tf.square(tf.sub(x_image, conv2_relu)))
 
-with tf.name_scope('test'):
-    y_weight_var = state_variable([batch_size, 10], name='y_weight')
-    y_pred = tf.nn.softmax(y_weight_var, name='prediction')
+
 
 total_loss = fc1_loss + fc2_loss + conv1_loss + conv2_loss
 with tf.name_scope('summary'):
@@ -99,31 +104,43 @@ with tf.name_scope('summary'):
     tf.scalar_summary('conv2_loss', conv2_loss)
     tf.scalar_summary('total_loss', total_loss)
 
-e_step = tf.train.AdamOptimizer(1e-4).minimize(total_loss, var_list=[fc1_var, fc2_var, conv1_var], name='E_optim')
+e_step = tf.train.AdamOptimizer(1e-2).minimize(total_loss, var_list=[fc1_var, fc2_var, conv1_var], name='E_optim')
 m_step = tf.train.AdamOptimizer(1e-4).minimize(total_loss,
                                                var_list=[W_fc1, b_fc1, W_fc2, b_fc2, W_conv1, b_conv1, W_conv2, b_conv2],
                                                name='M_optim')
-e_step_test = tf.train.AdamOptimizer(1e-4).minimize(total_loss, var_list = [fc1_var, fc2_var, conv1_var, y_weight_var],
+e_step_test = tf.train.AdamOptimizer(1e-2).minimize(total_loss, var_list = [fc1_var, fc2_var, conv1_var, y_weight_var],
                                                     name='E_optim_test')
 
 sess.run(tf.initialize_all_variables())
 summary_op = tf.merge_all_summaries()
 train_writer = tf.train.SummaryWriter('log/generative', sess.graph)
 
-e_step_size = 20
+e_step_size = 30
 m_step_size = 1000
+test_step_size = 100
+
+def test_network():
+    batch = mnist.test.next_batch(batch_size)
+    for e_iter in range(0, test_step_size):
+        sess.run(e_step_test, feed_dict={x:batch[0], y_ref: batch[1], train_phase: [False]*batch_size})
+    truth = np.argmax(batch[1], 1)
+    pred = np.argmax(sess.run(y_pred), 1)
+
+    correct_count = 0
+    for i in range(batch_size):
+        if truth[i] == pred[i]:
+            correct_count += 1
+    print(str(correct_count) + " out of " + str(batch_size) + " correct")
+
 for m_iter in range(m_step_size):
-    batch = mnist.train.next_batch(20)
+    batch = mnist.train.next_batch(batch_size)
     for e_iter in range(0, e_step_size):
-        sess.run(e_step, feed_dict={x:batch[0], y_ref: batch[1]})
-    summary_str = sess.run(summary_op, feed_dict={x:batch[0], y_ref: batch[1]})
+        sess.run(e_step, feed_dict={x:batch[0], y_ref: batch[1], train_phase: [True]*batch_size})
+    summary_str = sess.run(summary_op, feed_dict={x:batch[0], y_ref: batch[1], train_phase: [True]*batch_size})
     train_writer.add_summary(summary_str, m_iter)
     print("Iteration M: " + str(m_iter))
     train_writer.flush()
+    if m_iter % 10 == 0:
+        test_network()
 
 
-def test_network():
-    batch = mnist.test.next_batch(20)
-    for e_iter in range(0, e_step_size):
-        sess.run(e_step, feed_dict={x:batch[0], y_ref: batch[1]})
-    print(len(batch))
