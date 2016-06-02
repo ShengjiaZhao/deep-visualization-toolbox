@@ -2,7 +2,7 @@ __author__ = 'shengjia'
 
 import time
 import matplotlib
-matplotlib.use('Agg')
+# matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 
 import numpy as np
@@ -11,7 +11,6 @@ import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
 sess = tf.Session()
-
 
 def state_variable(shape, name=None):
     initial = tf.truncated_normal(shape, stddev=0.1)
@@ -119,8 +118,16 @@ e_step_size = 30
 m_step_size = 1000
 test_step_size = 100
 
+def reinitialize():
+    sess.run(fc1_var.initializer)
+    sess.run(fc2_var.initializer)
+    sess.run(conv1_var.initializer)
+    sess.run(y_weight_var.initializer)
+
+
 def test_network():
     batch = mnist.test.next_batch(batch_size)
+    reinitialize()
     for e_iter in range(0, test_step_size):
         sess.run(e_step_test, feed_dict={x:batch[0], y_ref: batch[1], train_phase: [False]*batch_size})
     truth = np.argmax(batch[1], 1)
@@ -134,8 +141,10 @@ def test_network():
 
 for m_iter in range(m_step_size):
     batch = mnist.train.next_batch(batch_size)
+    reinitialize()
     for e_iter in range(0, e_step_size):
         sess.run(e_step, feed_dict={x:batch[0], y_ref: batch[1], train_phase: [True]*batch_size})
+
     summary_str = sess.run(summary_op, feed_dict={x:batch[0], y_ref: batch[1], train_phase: [True]*batch_size})
     train_writer.add_summary(summary_str, m_iter)
     print("Iteration M: " + str(m_iter))
