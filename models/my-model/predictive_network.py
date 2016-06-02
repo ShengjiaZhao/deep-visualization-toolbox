@@ -81,10 +81,9 @@ with tf.name_scope("fc2"):
 with tf.name_scope("fc3"):
     W_fc3 = weight_variable([256, 28 * 28])
     b_fc3 = bias_variable([28 * 28])
-    # fc2_var = state_variable([batch_size, 7 * 7 * 32], name='fc2_var')
 
     fc3_relu = tf.reshape(tf.nn.relu(tf.matmul(fc2_var, W_fc3, name='fc2') + b_fc3, name='fc2_relu'), [batch_size] + [28, 28, 1])
-    fc3_loss = tf.reduce_sum(tf.square(tf.sub(x_image, fc3_relu)), name='fc2_loss') / (7*7*16*batch_size)
+    fc3_loss = tf.reduce_sum(tf.square(tf.sub(x_image, fc3_relu)), name='fc2_loss') / (28*28*batch_size)
 
 '''
 with tf.name_scope("fc1"):
@@ -135,7 +134,7 @@ with tf.name_scope('summary'):
 
 e_learning_rate = tf.placeholder(tf.float32, shape=[])
 e_step = tf.train.GradientDescentOptimizer(e_learning_rate).minimize(total_loss,
-                                                                     var_list=[fc1_var, fc2_var],
+                                                                     var_list=[fc1_var, fc2_var, y_weight_var],
                                                                      name='E_optim')
 m_learning_rate = tf.placeholder(tf.float32, shape=[])
 m_step = tf.train.GradientDescentOptimizer(m_learning_rate).minimize(total_loss,
@@ -168,12 +167,12 @@ e_step_size = 20
 m_step_size = 10000
 test_step_size = 100
 
+
 def reinitialize():
     sess.run(fc1_var.initializer)
-    # sess.run(fc2_var.initializer)
+    sess.run(fc2_var.initializer)
     # sess.run(conv1_var.initializer)
     sess.run(y_weight_var.initializer)
-
 
 
 def test_network():
@@ -186,7 +185,7 @@ def test_network():
         test_lr *= 0.9
         # print(sess.run(fc1_var)[0, 0:10])
     truth = np.argmax(test_batch[1], 1)
-    pred = np.argmax(sess.run(y_pred), 1)
+    pred = np.argmax(sess.run(y_weight_var), 1)
 
     correct_count = 0
     for i in range(batch_size):
@@ -194,14 +193,23 @@ def test_network():
             correct_count += 1
     print(str(correct_count) + " out of " + str(batch_size) + " correct")
 
+plt.ion()
+plt.show()
+vis_index = 0
+
 def visualize():
-    input_label = [0] * 10
-    input_label[8] = 1
-    vis_result = sess.run(image_out, feed_dict={y_vis: [input_label]})
-    print(vis_result.shape)
-    plt.imshow(vis_result[:, :, 0])
-    plt.show()
+    global vis_index
+    for i in range(10):
+        plt.subplot(3, 4, i)
+        input_label = [0] * 10
+        input_label[i] = 1
+        vis_result = sess.run(image_out, feed_dict={y_vis: [input_label]})
+        plt.imshow(vis_result[:, :, 0])
+    plt.draw()
+    plt.savefig('vis/image' + str(vis_index) + '.png')
+    vis_index += 1
 visualize()
+
 
 for m_iter in range(m_step_size):
     batch = mnist.train.next_batch(batch_size)
@@ -211,25 +219,25 @@ for m_iter in range(m_step_size):
     reinitialize()
     e_lr = 2000
     for e_iter in range(0, e_step_size):
-        sess.run(e_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [True]*batch_size, e_learning_rate: e_lr})
+        sess.run(e_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [False]*batch_size, e_learning_rate: e_lr})
         e_lr *= 0.9
         # print(sess.run(fc1_var)[0, 0:10])
     for e_iter in range(0, 2):
-        sess.run(e_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [True]*batch_size, e_learning_rate: e_lr})
-        sess.run(m_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [True]*batch_size, m_learning_rate: m_lr})
+        sess.run(e_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [False]*batch_size, e_learning_rate: e_lr})
+        sess.run(m_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [False]*batch_size, m_learning_rate: m_lr})
     summary_str, loss_result = sess.run([summary_op, total_loss], feed_dict={x: batch[0], y_ref: batch[1],
-                                                  train_phase: [True]*batch_size})
+                                                  train_phase: [False]*batch_size})
     train_writer.add_summary(summary_str, m_iter)
     print("Iteration M: " + str(m_iter) + " with loss " + str(loss_result))
     train_writer.flush()
-    if m_iter % 50 == 0:
+    if m_iter % 100 == 0:
         m_lr *= 0.95
 
     if m_iter % 20 == 0 and e_step_size < 30:
         e_step_size += 1
     if m_iter % 50 == 0 and m_iter != 0:
         save_path = saver.save(sess, "model.ckpt")
-
+        visualize()
 
 
 
