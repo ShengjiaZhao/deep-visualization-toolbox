@@ -11,6 +11,8 @@ import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
 sess = tf.Session()
+sess.as_default()
+
 
 def state_variable(shape, name=None):
     initial = tf.truncated_normal(shape, stddev=0.1)
@@ -47,7 +49,7 @@ def unpool(value, name='unpool'):
         out = tf.reshape(out, out_size, name=scope)
     return out
 
-batch_size = 200
+batch_size = 100
 
 x = tf.placeholder(tf.float32, shape=[batch_size, 784])
 y_ref = tf.placeholder(tf.float32, shape=[batch_size, 10])  # Each batch contains 20 samples
@@ -93,9 +95,7 @@ with tf.name_scope('conv2'):
     conv2_relu = tf.nn.relu(tf.nn.conv2d(conv2_in, W_conv2, strides=[1, 1, 1, 1], padding='SAME') + b_conv2)
     conv2_loss = tf.reduce_sum(tf.square(tf.sub(x_image, conv2_relu)))
 
-
-
-total_loss = fc1_loss + fc2_loss + conv1_loss + conv2_loss
+total_loss = fc1_loss + fc2_loss + conv1_loss + 0.5 * conv2_loss
 with tf.name_scope('summary'):
     tf.scalar_summary('fc1_loss', fc1_loss)
     tf.scalar_summary('fc2_loss', fc2_loss)
@@ -104,7 +104,7 @@ with tf.name_scope('summary'):
     tf.scalar_summary('total_loss', total_loss)
 
 e_step = tf.train.AdamOptimizer(1e-2).minimize(total_loss, var_list=[fc1_var, fc2_var, conv1_var], name='E_optim')
-m_step = tf.train.AdamOptimizer(1e-4).minimize(total_loss,
+m_step = tf.train.AdamOptimizer(1e-2).minimize(total_loss,
                                                var_list=[W_fc1, b_fc1, W_fc2, b_fc2, W_conv1, b_conv1, W_conv2, b_conv2],
                                                name='M_optim')
 e_step_test = tf.train.AdamOptimizer(1e-2).minimize(total_loss, var_list = [fc1_var, fc2_var, conv1_var, y_weight_var],
@@ -114,7 +114,7 @@ sess.run(tf.initialize_all_variables())
 summary_op = tf.merge_all_summaries()
 train_writer = tf.train.SummaryWriter('log/generative', sess.graph)
 
-e_step_size = 30
+e_step_size = 10
 m_step_size = 1000
 test_step_size = 100
 
@@ -126,11 +126,11 @@ def reinitialize():
 
 
 def test_network():
-    batch = mnist.test.next_batch(batch_size)
+    test_batch = mnist.test.next_batch(batch_size)
     reinitialize()
     for e_iter in range(0, test_step_size):
-        sess.run(e_step_test, feed_dict={x:batch[0], y_ref: batch[1], train_phase: [False]*batch_size})
-    truth = np.argmax(batch[1], 1)
+        sess.run(e_step_test, feed_dict={x: test_batch[0], y_ref: test_batch[1], train_phase: [False]*batch_size})
+    truth = np.argmax(test_batch[1], 1)
     pred = np.argmax(sess.run(y_pred), 1)
 
     correct_count = 0
@@ -139,17 +139,23 @@ def test_network():
             correct_count += 1
     print(str(correct_count) + " out of " + str(batch_size) + " correct")
 
+
 for m_iter in range(m_step_size):
     batch = mnist.train.next_batch(batch_size)
     reinitialize()
     for e_iter in range(0, e_step_size):
-        sess.run(e_step, feed_dict={x:batch[0], y_ref: batch[1], train_phase: [True]*batch_size})
-
-    summary_str = sess.run(summary_op, feed_dict={x:batch[0], y_ref: batch[1], train_phase: [True]*batch_size})
+        sess.run(e_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [True]*batch_size})
+    for e_iter in range(0, 2):
+        sess.run(e_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [True]*batch_size})
+        sess.run(m_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [True]*batch_size})
+    summary_str = sess.run(summary_op, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [True]*batch_size})
     train_writer.add_summary(summary_str, m_iter)
     print("Iteration M: " + str(m_iter))
     train_writer.flush()
-    if m_iter % 10 == 0:
+    if m_iter != 0 and m_iter % 10 == 0:
         test_network()
+    if m_iter % 100 == 0 and e_step_size < 30:
+        e_step_size += 1
+
 
 
