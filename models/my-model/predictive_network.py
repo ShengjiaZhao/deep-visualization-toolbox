@@ -71,13 +71,13 @@ with tf.name_scope("fc1"):
     fc1_loss = tf.reduce_sum(tf.square(tf.sub(fc1_var, fc1_relu)), name='fc1_loss') / (256*batch_size)
 
 with tf.name_scope("fc2"):
-    W_fc2 = weight_variable([256, 7 * 7 * 32])
-    b_fc2 = bias_variable([7 * 7 * 32])
-    fc2_var = state_variable([batch_size, 7 * 7 * 32], name='fc2_var')
+    W_fc2 = weight_variable([256, 14 * 14 * 16])
+    b_fc2 = bias_variable([14 * 14 * 16])
+    fc2_var = state_variable([batch_size, 14 * 14 * 16], name='fc2_var')
 
     fc2_relu = tf.nn.relu(tf.matmul(fc1_var, W_fc2, name='fc2') + b_fc2, name='fc2_relu')
-    fc2_loss = tf.reduce_sum(tf.square(tf.sub(fc2_var, fc2_relu)), name='fc2_loss') / (7*7*32*batch_size)
-
+    fc2_loss = tf.reduce_sum(tf.square(tf.sub(fc2_var, fc2_relu)), name='fc2_loss') / (14*14*16*batch_size)
+'''
 with tf.name_scope('conv1'):
     conv1_in = unpool(tf.reshape(fc2_var, [batch_size, 7, 7, 32]), name='conv1_unpool')
     W_conv1 = weight_variable([5, 5, 32, 24])
@@ -86,13 +86,13 @@ with tf.name_scope('conv1'):
 
     conv1_relu = tf.nn.relu(tf.nn.conv2d(conv1_in, W_conv1, strides=[1, 1, 1, 1], padding='SAME') + b_conv1)
     conv1_loss = tf.reduce_sum(tf.square(tf.sub(conv1_var, conv1_relu)), name='conv1_loss') / (14*14*24*batch_size)
-
+'''
 with tf.name_scope('conv2'):
-    conv2_in = unpool(conv1_var, name='conv2_unpool')
-    W_conv2 = weight_variable([5, 5, 24, 1])
+    conv2_in = unpool(tf.reshape(fc2_var, [batch_size, 14, 14, 16]), name='conv2_unpool')
+    W_conv2 = weight_variable([5, 5, 16, 1])
     b_conv2 = bias_variable([1])
 
-    conv2_relu = tf.nn.conv2d(conv2_in, W_conv2, strides=[1, 1, 1, 1], padding='SAME') + b_conv2
+    conv2_relu = tf.nn.relu(tf.nn.conv2d(conv2_in, W_conv2, strides=[1, 1, 1, 1], padding='SAME') + b_conv2)
     conv2_loss = tf.reduce_sum(tf.square(tf.sub(x_image, conv2_relu)), name='conv2_loss') / (28*28*batch_size)
 
 '''
@@ -127,26 +127,26 @@ with tf.name_scope('conv2'):
     conv2_loss = tf.reduce_sum(tf.square(tf.sub(x_image, conv2_relu)), name='conv2_loss') / (28*28*batch_size)
 '''
 
-total_loss = fc1_loss + fc2_loss + conv1_loss + conv2_loss
+total_loss = fc1_loss + fc2_loss + conv2_loss
 with tf.name_scope('summary'):
     tf.scalar_summary('fc1_loss', fc1_loss)
     tf.scalar_summary('fc2_loss', fc2_loss)
     #tf.scalar_summary('fc3_loss', fc3_loss)
-    tf.scalar_summary('conv1_loss', conv1_loss)
+    #tf.scalar_summary('conv1_loss', conv1_loss)
     tf.scalar_summary('conv2_loss', conv2_loss)
     tf.scalar_summary('total_loss', total_loss)
 
 e_learning_rate = tf.placeholder(tf.float32, shape=[])
 e_step = tf.train.GradientDescentOptimizer(e_learning_rate).minimize(total_loss,
-                                                                     var_list=[fc1_var, fc2_var, conv1_var, y_weight_var],
+                                                                     var_list=[fc1_var, fc2_var],
                                                                      name='E_optim')
 m_learning_rate = tf.placeholder(tf.float32, shape=[])
 m_step = tf.train.GradientDescentOptimizer(m_learning_rate).minimize(total_loss,
-                                           var_list=[W_fc1, b_fc1, W_fc2, b_fc2, W_conv1, b_conv1, W_conv2, b_conv2],
+                                           var_list=[W_fc1, b_fc1, W_fc2, b_fc2, W_conv2, b_conv2],
                                            name='M_optim')
 
 e_step_test = tf.train.GradientDescentOptimizer(e_learning_rate).minimize(total_loss,
-                                                                          var_list=[fc1_var, fc2_var, conv1_var, y_weight_var],
+                                                                          var_list=[fc1_var, fc2_var, y_weight_var],
                                                                           name='E_optim_test')
 summary_op = tf.merge_all_summaries()
 train_writer = tf.train.SummaryWriter('log/generative', sess.graph)
@@ -155,9 +155,9 @@ y_vis = tf.placeholder(tf.float32, shape=[1, 10])
 with tf.name_scope("visualization"):
     vis_fc1_relu = tf.nn.relu(tf.matmul(y_vis, W_fc1) + b_fc1)
     vis_fc2_relu = tf.nn.relu(tf.matmul(vis_fc1_relu, W_fc2) + b_fc2)
-    vis_conv1_reshape = unpool(tf.reshape(vis_fc2_relu, [1, 7, 7, 32]))
-    vis_conv1_relu = tf.nn.relu(tf.nn.conv2d(vis_conv1_reshape, W_conv1, strides=[1, 1, 1, 1], padding='SAME') + b_conv1)
-    vis_conv2_reshape = unpool(vis_conv1_relu)
+    vis_conv2_reshape = unpool(tf.reshape(vis_fc2_relu, [1, 14, 14, 16]))
+    # vis_conv1_relu = tf.nn.relu(tf.nn.conv2d(vis_conv1_reshape, W_conv1, strides=[1, 1, 1, 1], padding='SAME') + b_conv1)
+    #vis_conv2_reshape = unpool(vis_conv1_relu)
     image_out = tf.reshape(tf.nn.relu(tf.nn.conv2d(vis_conv2_reshape, W_conv2, strides=[1, 1, 1, 1], padding='SAME') + b_conv2), [28, 28, 1])
 
 sess.run(tf.initialize_all_variables())
@@ -219,20 +219,20 @@ visualize()
 
 for m_iter in range(m_step_size):
     batch = mnist.train.next_batch(batch_size)
-    #if m_iter != 0 and m_iter % 20 == 0:
-    #    test_network()
-
+    if m_iter != 0 and m_iter % 20 == 0:
+        test_network()
+    use_label = True
     reinitialize()
     e_lr = 100
     for e_iter in range(0, e_step_size):
-        sess.run(e_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [False]*batch_size, e_learning_rate: e_lr})
+        sess.run(e_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [use_label]*batch_size, e_learning_rate: e_lr})
         e_lr *= 0.9
         # print(sess.run(fc1_var)[0, 0:10])
     for e_iter in range(0, 2):
-        sess.run(e_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [False]*batch_size, e_learning_rate: e_lr})
-        sess.run(m_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [False]*batch_size, m_learning_rate: m_lr})
+        sess.run(e_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [use_label]*batch_size, e_learning_rate: e_lr})
+        sess.run(m_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [use_label]*batch_size, m_learning_rate: m_lr})
     summary_str, loss_result = sess.run([summary_op, total_loss], feed_dict={x: batch[0], y_ref: batch[1],
-                                                  train_phase: [False]*batch_size})
+                                                  train_phase: [use_label]*batch_size})
     train_writer.add_summary(summary_str, m_iter)
     print("Iteration M: " + str(m_iter) + " with loss " + str(loss_result))
     train_writer.flush()
