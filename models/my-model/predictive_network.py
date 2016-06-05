@@ -69,6 +69,7 @@ with tf.name_scope("fc1"):
 
     fc1_relu = tf.nn.relu(tf.matmul(fc1_input, W_fc1, name='fc1') + b_fc1, name='fc1_relu')
     fc1_loss = tf.reduce_sum(tf.square(tf.sub(fc1_var, fc1_relu)), name='fc1_loss') / (256*batch_size)
+    fc1_reg = -tf.log(tf.reduce_sum(fc1_relu) / (256*batch_size) + 1)
 
 with tf.name_scope("fc2"):
     W_fc2 = weight_variable([256, 256])
@@ -77,6 +78,7 @@ with tf.name_scope("fc2"):
 
     fc2_relu = tf.nn.relu(tf.matmul(fc1_var, W_fc2, name='fc2') + b_fc2, name='fc2_relu')
     fc2_loss = tf.reduce_sum(tf.square(tf.sub(fc2_var, fc2_relu)), name='fc2_loss') / (256*batch_size)
+    fc2_reg = -tf.log(tf.reduce_sum(fc2_relu) / (256*batch_size) + 1)
 
 with tf.name_scope("fc3"):
     W_fc3 = weight_variable([256, 28 * 28])
@@ -123,25 +125,27 @@ with tf.name_scope('conv2'):
     conv2_loss = tf.reduce_sum(tf.square(tf.sub(x_image, conv2_relu)), name='conv2_loss') / (28*28*batch_size)
 '''
 
-total_loss = fc1_loss + fc2_loss + fc3_loss # + #conv1_loss + conv2_loss
+total_train_loss = fc1_loss * 10 + fc2_loss + fc3_loss + fc1_reg + fc2_reg # + #conv1_loss + conv2_loss
+total_test_loss = fc1_loss * 10 + fc2_loss + fc3_loss + fc1_reg + fc2_reg
+
 with tf.name_scope('summary'):
     tf.scalar_summary('fc1_loss', fc1_loss)
     tf.scalar_summary('fc2_loss', fc2_loss)
     tf.scalar_summary('fc3_loss', fc3_loss)
     #tf.scalar_summary('conv1_loss', conv1_loss)
     #tf.scalar_summary('conv2_loss', conv2_loss)
-    tf.scalar_summary('total_loss', total_loss)
+    tf.scalar_summary('total_loss', total_train_loss)
 
 e_learning_rate = tf.placeholder(tf.float32, shape=[])
-e_step = tf.train.GradientDescentOptimizer(e_learning_rate).minimize(total_loss,
-                                                                     var_list=[fc1_var, fc2_var, y_weight_var],
+e_step = tf.train.GradientDescentOptimizer(e_learning_rate).minimize(total_train_loss,
+                                                                     var_list=[fc1_var, fc2_var],
                                                                      name='E_optim')
 m_learning_rate = tf.placeholder(tf.float32, shape=[])
-m_step = tf.train.GradientDescentOptimizer(m_learning_rate).minimize(total_loss,
+m_step = tf.train.GradientDescentOptimizer(m_learning_rate).minimize(total_train_loss,
                                            var_list=[W_fc1, b_fc1, W_fc2, b_fc2, W_fc3, b_fc3],
                                            name='M_optim')
 
-e_step_test = tf.train.GradientDescentOptimizer(e_learning_rate).minimize(total_loss,
+e_step_test = tf.train.GradientDescentOptimizer(e_learning_rate).minimize(total_test_loss,
                                                                           var_list=[fc1_var, fc2_var, y_weight_var],
                                                                           name='E_optim_test')
 summary_op = tf.merge_all_summaries()
@@ -184,9 +188,19 @@ def test_network():
                                          train_phase: [False]*batch_size, e_learning_rate: test_lr})
         test_lr *= 0.9
         # print(sess.run(fc1_var)[0, 0:10])
+    print("Loss is " + str(sess.run(fc1_loss, feed_dict={x: test_batch[0], y_ref: test_batch[1],
+                                            train_phase: [False]*batch_size})))
+    sess.run(y_weight_var.initializer)
+    print("Loss is " + str(sess.run(fc1_loss, feed_dict={x: test_batch[0], y_ref: test_batch[1],
+                                            train_phase: [False]*batch_size})))
     truth = np.argmax(test_batch[1], 1)
     pred = np.argmax(sess.run(y_weight_var), 1)
-
+    print("Loss is " + str(sess.run(total_test_loss, feed_dict={x: test_batch[0], y_ref: test_batch[1],
+                                            train_phase: [False]*batch_size})))
+    print(np.average(np.abs(sess.run(fc1_relu, feed_dict={x: test_batch[0], y_ref: test_batch[1],
+                                            train_phase: [False]*batch_size}))))
+    print(np.average(np.abs(sess.run(W_fc2))))
+    print(np.average(np.abs(sess.run(W_fc3))))
     correct_count = 0
     for i in range(batch_size):
         if truth[i] == pred[i]:
@@ -213,20 +227,20 @@ visualize()
 
 for m_iter in range(m_step_size):
     batch = mnist.train.next_batch(batch_size)
-    if m_iter != 0 and m_iter % 20 == 0:
+    if m_iter % 5 == 0:
         test_network()
-
+    use_label = True
     reinitialize()
     e_lr = 2000
     for e_iter in range(0, e_step_size):
-        sess.run(e_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [False]*batch_size, e_learning_rate: e_lr})
+        sess.run(e_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [use_label]*batch_size, e_learning_rate: e_lr})
         e_lr *= 0.9
         # print(sess.run(fc1_var)[0, 0:10])
     for e_iter in range(0, 2):
-        sess.run(e_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [False]*batch_size, e_learning_rate: e_lr})
-        sess.run(m_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [False]*batch_size, m_learning_rate: m_lr})
-    summary_str, loss_result = sess.run([summary_op, total_loss], feed_dict={x: batch[0], y_ref: batch[1],
-                                                  train_phase: [False]*batch_size})
+        sess.run(e_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [use_label]*batch_size, e_learning_rate: e_lr})
+        sess.run(m_step, feed_dict={x: batch[0], y_ref: batch[1], train_phase: [use_label]*batch_size, m_learning_rate: m_lr})
+    summary_str, loss_result = sess.run([summary_op, total_train_loss], feed_dict={x: batch[0], y_ref: batch[1],
+                                                  train_phase: [use_label]*batch_size})
     train_writer.add_summary(summary_str, m_iter)
     print("Iteration M: " + str(m_iter) + " with loss " + str(loss_result))
     train_writer.flush()
