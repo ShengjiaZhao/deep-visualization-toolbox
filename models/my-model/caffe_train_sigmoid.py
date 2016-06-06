@@ -5,6 +5,8 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 
+relaxation = False
+
 # The caffe module needs to be on the Python path;
 #  we'll add it here explicitly.
 caffe_root = '/home/ubuntu/caffe/'  # this file should be run from {caffe_root}/examples (otherwise change this line)
@@ -40,7 +42,10 @@ def set_ratio(ratio):
 solver = None  # ignore this workaround for lmdb data (can't instantiate two solvers on the same data)
 solver = caffe.SGDSolver(solver_file)
 solver.net.copy_from(pretrained_model)
-sigmoid_ratio = 1000
+if relaxation:
+    sigmoid_ratio = 1000
+else:
+    sigmoid_ratio = 0.5
 set_ratio(sigmoid_ratio)
 
 
