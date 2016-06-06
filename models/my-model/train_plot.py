@@ -61,4 +61,4 @@ def extract_info_sigmoid(filename):
 
     return {'iter': iteration_seq,
             'accuracy': accuracy_seq,
-            'sigmoid': sigmoid}
+            'sigmoid': sigmoid_seq}
