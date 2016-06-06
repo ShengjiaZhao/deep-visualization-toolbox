@@ -77,8 +77,8 @@ for it in range(niter):
     solver.step(1)  # SGD by Caffe
     elapsed_time = time.time() - step_time
 
-    if it % 500 == 0 and sigmoid_ratio > 0.5:
-        sigmoid_ratio *= 0.8
+    if it % 5 == 0 and sigmoid_ratio > 0.5:
+        sigmoid_ratio *= 0.997
         set_ratio(sigmoid_ratio)
 
     # store the train loss
@@ -100,7 +100,7 @@ for it in range(niter):
                            == solver.test_nets[0].blobs['label'].data)
         test_acc[it // test_interval] = correct / 100.0 / batch_size
         print("Test accuracy: " + str(correct / 100.0 / batch_size))
-        test_logger.write("Test accuracy@iter " + str(it) + " " + str(correct / 100.0 / batch_size) + "\n")
+        test_logger.write("Test accuracy@iter " + str(it) + " " + str(correct / 100.0 / batch_size) + " sigmoid_ratio " + str(sigmoid_ratio) + "\n")
         test_logger.flush()
         logger.flush()
 
