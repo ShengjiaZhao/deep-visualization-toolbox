@@ -153,24 +153,8 @@ layer {
   type: "InnerProduct"
   bottom: "pool5"
   top: "fc6"
-  param {
-    lr_mult: 1
-    decay_mult: 1
-  }
-  param {
-    lr_mult: 2
-    decay_mult: 0
-  }
   inner_product_param {
     num_output: 4096
-    weight_filler {
-      type: "gaussian"
-      std: 0.005
-    }
-    bias_filler {
-      type: "constant"
-      value: 1
-    }
   }
 }
 layer {
@@ -180,10 +164,10 @@ layer {
   top: "scale6_1"
   scale_param {
     num_axes: 0
-  }
-  param {
-    lr_mult: 0
-    decay_mult: 0
+    filler {
+      type: "constant"
+      value: 2.0010109790
+    }
   }
 }
 layer {
@@ -204,10 +188,6 @@ layer {
       value: -0.5
     }
   }
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
 }
 layer {
   name: "scale6_2"
@@ -216,10 +196,10 @@ layer {
   top: "scale6_2"
   scale_param {
     num_axes: 0
-  }
-  param {
-    lr_mult: 0
-    decay_mult: 0
+    filler {
+      type: "constant"
+      value: 1.99898953172
+    }
   }
 }
 layer {
@@ -244,14 +224,6 @@ layer {
   top: "fc7"
   inner_product_param {
     num_output: 4096
-    weight_filler {
-      type: "gaussian"
-      std: 0.005
-    }
-    bias_filler {
-      type: "constant"
-      value: 1
-    }
   }
 }
 layer {
@@ -261,6 +233,10 @@ layer {
   top: "scale7_1"
   scale_param {
     num_axes: 0
+    filler {
+      type: "constant"
+      value: 2.0010109790
+    }
   }
 }
 layer {
@@ -289,6 +265,10 @@ layer {
   top: "scale7_2"
   scale_param {
     num_axes: 0
+    filler {
+      type: "constant"
+      value: 1.99898953172
+    }
   }
 }
 layer {
