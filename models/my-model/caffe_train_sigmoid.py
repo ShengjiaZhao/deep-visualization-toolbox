@@ -61,7 +61,7 @@ lines = open(lookup_file).readlines()
 names = [line.split()[1] for line in lines]
 
 import time
-niter = 45000
+niter = 90000
 test_interval = 100
 save_interval = 10000
 # losses will also be stored in the log

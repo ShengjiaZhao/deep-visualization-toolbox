@@ -3,10 +3,10 @@ test_iter: 100
 test_interval: 1000
 base_lr: 0.001
 lr_policy: "step"
-gamma: 0.5
+gamma: 0.7
 stepsize: 6000
 display: 20
-max_iter: 45000
+max_iter: 90000
 momentum: 0.9
 weight_decay: 0.0005
 snapshot: 10000
