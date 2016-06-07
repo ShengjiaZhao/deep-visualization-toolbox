@@ -41,7 +41,7 @@ def set_ratio(ratio):
 # load the solver and create train and test nets
 solver = None  # ignore this workaround for lmdb data (can't instantiate two solvers on the same data)
 solver = caffe.SGDSolver(solver_file)
-solver.net.copy_from(pretrained_model)
+# solver.net.copy_from(pretrained_model)
 if relaxation:
     sigmoid_ratio = 1000
 else:
