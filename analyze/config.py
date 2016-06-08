@@ -27,4 +27,4 @@ elif environment == 'BOTH':
     settings2['activation_root'] = '/home/ubuntu/sdg/activations/'
 
     settings3['image_root'] = '/home/ubuntu/sdg/train/'
-    settings3['node_root'] = '/home/ubuntu/sdg/results/'
+    settings3['node_root'] = '/home/ubuntu/sdg/sigmoid_results/'
