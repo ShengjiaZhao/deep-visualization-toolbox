@@ -3,6 +3,7 @@ __author__ = 'shengjia'
 
 settings = {}
 settings2 = {}
+settings3 = {}
 environment = "BOTH"
 
 if environment == 'REMOTE':
@@ -24,3 +25,6 @@ elif environment == 'BOTH':
     settings2['image_root'] = '/home/ubuntu/sdg/train/'
     settings2['node_root'] = '/home/ubuntu/sdg/results/'
     settings2['activation_root'] = '/home/ubuntu/sdg/activations/'
+
+    settings3['image_root'] = '/home/ubuntu/sdg/train/'
+    settings3['node_root'] = '/home/ubuntu/sdg/results/'
