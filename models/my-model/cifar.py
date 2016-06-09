@@ -22,7 +22,7 @@ class DatasetCIFAR:
             self.data_array[batch_size*i:batch_size*(i+1), :] = batches[i]['data'].astype(np.float32) / 256
             labels = batches[i]['labels']
             for j in range(batch_size):
-                self.label_array[batch_size*i+j, labels[i]] = 1.0
+                self.label_array[batch_size*i+j, labels[j]] = 1.0
 
         test_batch_size = test_batch['data'].shape[0]
         self.test_data_array = test_batch['data'].astype(np.float32) / 256.0
