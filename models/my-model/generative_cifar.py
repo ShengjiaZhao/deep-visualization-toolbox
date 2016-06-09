@@ -54,7 +54,7 @@ batch_size = 100
 dataset = DatasetCIFAR()
 x = tf.placeholder(tf.float32, shape=[batch_size, 32*32*3])
 y_ref = tf.placeholder(tf.float32, shape=[batch_size, 10])  # Each batch contains 20 samples
-x_image = tf.reshape(x, [-1, 32, 32, 3])
+# x_image = tf.reshape(x, [-1, 32, 32, 3])
 
 with tf.name_scope('test'):
     y_weight_var = state_variable([batch_size, 10], name='y_weight')
@@ -90,7 +90,7 @@ with tf.name_scope("fc3"):
 
     fc3_relu = tf.nn.relu(tf.matmul(fc2_var, W_fc3, name='fc3') + b_fc3, name='fc3_relu')
     fc3_loss = tf.reduce_sum(tf.square(tf.sub(x, fc3_relu)), name='fc3_loss') / (32*32*3*batch_size)
-    fc3_weight_loss = tf.reduce_sum(tf.square(W_fc3)) / (256*32*28)
+    fc3_weight_loss = tf.reduce_sum(tf.square(W_fc3)) / (256*32*32*3)
 
 total_train_loss = fc1_loss * 10 + fc2_loss + fc3_loss # + #conv1_loss + conv2_loss
 total_test_loss = fc1_loss * 100 + fc2_loss + fc3_loss
@@ -194,12 +194,12 @@ def visualize():
     global vis_index
     for i in range(10):
         plt.subplot(3, 4, i)
-        input_label = [0] * 12
-        input_label[i] = 1
+        input_label = [0.0] * (10 + transform_dim)
+        input_label[i] = 1.0
         for j in range(transform_dim):
             input_label[10 + j] = random.random() * (transform_var_ub[j] - transform_var_lb[j]) + transform_var_lb[j]
         vis_result = sess.run(image_out, feed_dict={y_vis: [input_label]})
-        vis_result = dataset.convert_to_rgb(vis_result[:, :, 0])
+        vis_result = dataset.convert_to_rgb(vis_result[0, :])
         plt.imshow(vis_result)
     plt.draw()
     plt.savefig('vis/image' + str(vis_index) + '.png')
@@ -223,23 +223,34 @@ def visualize_all():
 
 transform_var_ub = np.zeros(transform_dim)
 transform_var_lb = np.zeros(transform_dim)
+batch_data, batch_label = dataset.next_batch(batch_size)
 for m_iter in range(m_step_size):
-    batch_data, batch_label = dataset.next_batch(batch_size)
-    if m_iter % 5 == 0:
-        test_network()
+
+    # if m_iter % 5 == 0:
+    #     test_network()
     use_label = True
     reinitialize()
     e_lr = 1000
+    e_list = []
     for e_iter in range(0, e_step_size):
-        sess.run(e_step, feed_dict={x: batch_data, y_ref: batch_label, train_phase: [use_label]*batch_size, e_learning_rate: e_lr})
+        res = sess.run([e_step, total_train_loss], feed_dict={x: batch_data, y_ref: batch_label, train_phase: [use_label]*batch_size, e_learning_rate: e_lr})
+        e_list.append(res[1])
         e_lr *= 0.9
         # print(sess.run(fc1_var)[0, 0:10])
+    # plt.ioff()
+    # plt.plot(e_list)
+    # plt.yscale('log')
+    # plt.show()
     transform_value = sess.run(transform_var)
     for b in range(batch_size):
         for i in range(transform_dim):
             transform_var_ub[i] = max(transform_value[b, i], transform_var_ub[i])
             transform_var_lb[i] = min(transform_value[b, i], transform_var_lb[i])
-    print(transform_var_ub, transform_var_lb)
+    transform_var_new_ub = transform_var_lb + 0.99 * (transform_var_ub - transform_var_lb)  # Decay this by 0.01
+    transform_var_new_lb = transform_var_ub - 0.99 * (transform_var_ub - transform_var_lb)  # Decay this by 0.01
+    transform_var_ub = transform_var_new_ub
+    transform_var_lb = transform_var_new_lb
+
     for e_iter in range(0, 2):
         sess.run(e_step, feed_dict={x: batch_data, y_ref: batch_label, train_phase: [use_label]*batch_size, e_learning_rate: e_lr})
         sess.run(m_step, feed_dict={x: batch_data, y_ref: batch_label, train_phase: [use_label]*batch_size, m_learning_rate: m_lr})
@@ -249,14 +260,14 @@ for m_iter in range(m_step_size):
     train_writer.add_summary(summary_str, m_iter)
     print("Iteration M: " + str(m_iter) + " with loss " + str(loss_result))
     train_writer.flush()
-    if m_iter % 100 == 0:
+    if m_iter % 10 == 0:
         m_lr *= 0.95
 
     if m_iter % 20 == 0 and e_step_size < 30:
         e_step_size += 1
     if m_iter % 50 == 0 and m_iter != 0:
         save_path = saver.save(sess, "model.ckpt")
-    if m_iter % 20 == 0 and m_iter != 0:
+    if m_iter % 20 == 0:
         visualize()
 
 
