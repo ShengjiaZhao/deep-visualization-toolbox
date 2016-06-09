@@ -4,7 +4,6 @@ import time, os
 import matplotlib
 # matplotlib.use('Agg')
 from matplotlib import pyplot as plt
-import cPickle
 import numpy as np
 import tensorflow as tf
 from cifar import *
@@ -51,8 +50,8 @@ def unpool(value, name='unpool'):
 
 batch_size = 100
 
-dataset = DatasetCIFAR()
-x = tf.placeholder(tf.float32, shape=[batch_size, 32*32*3])
+dataset = DatasetCIFAR(gray_scale=True)
+x = tf.placeholder(tf.float32, shape=[batch_size, 32*32])
 y_ref = tf.placeholder(tf.float32, shape=[batch_size, 10])  # Each batch contains 20 samples
 # x_image = tf.reshape(x, [-1, 32, 32, 3])
 
@@ -61,7 +60,7 @@ with tf.name_scope('test'):
     y_pred = tf.nn.softmax(y_weight_var, name='prediction')
 
 train_phase = tf.placeholder(tf.bool, shape=[batch_size])
-transform_dim = 2
+transform_dim = 10
 transform_var = state_variable([batch_size, transform_dim], name='transform_var')
 with tf.name_scope("fc1"):
     fc1_input = tf.concat(1, [tf.select(train_phase, y_ref, y_pred), transform_var])
@@ -85,14 +84,14 @@ with tf.name_scope("fc2"):
     fc2_weight_loss = tf.reduce_sum(tf.square(W_fc2)) / (256*256)
 
 with tf.name_scope("fc3"):
-    W_fc3 = weight_variable([256, 32*32*3])
-    b_fc3 = bias_variable([32*32*3])
+    W_fc3 = weight_variable([256, 32*32])
+    b_fc3 = bias_variable([32*32])
 
-    fc3_relu = tf.nn.relu(tf.matmul(fc2_var, W_fc3, name='fc3') + b_fc3, name='fc3_relu')
-    fc3_loss = tf.reduce_sum(tf.square(tf.sub(x, fc3_relu)), name='fc3_loss') / (32*32*3*batch_size)
-    fc3_weight_loss = tf.reduce_sum(tf.square(W_fc3)) / (256*32*32*3)
+    fc3_relu = tf.nn.sigmoid(tf.matmul(fc2_var, W_fc3, name='fc3') + b_fc3, name='fc3_relu')
+    fc3_loss = tf.reduce_sum(tf.square(tf.sub(x, fc3_relu)), name='fc3_loss') / (32*32*batch_size)
+    fc3_weight_loss = tf.reduce_sum(tf.square(W_fc3)) / (256*32*32)
 
-total_train_loss = fc1_loss * 10 + fc2_loss + fc3_loss # + #conv1_loss + conv2_loss
+total_train_loss = fc1_loss * 20 + fc2_loss + fc3_loss # + #conv1_loss + conv2_loss
 total_test_loss = fc1_loss * 100 + fc2_loss + fc3_loss
 
 with tf.name_scope('summary'):
@@ -126,11 +125,11 @@ e_step_test = tf.train.GradientDescentOptimizer(e_learning_rate).minimize(total_
 summary_op = tf.merge_all_summaries()
 train_writer = tf.train.SummaryWriter('log/generative', sess.graph)
 
-y_vis = tf.placeholder(tf.float32, shape=[1, 12])
+y_vis = tf.placeholder(tf.float32, shape=[1, 10+transform_dim])
 with tf.name_scope("visualization"):
     vis_fc1_relu = tf.nn.relu(tf.matmul(y_vis, W_fc1) + b_fc1)
     vis_fc2_relu = tf.nn.relu(tf.matmul(vis_fc1_relu, W_fc2) + b_fc2)
-    image_out = tf.nn.relu(tf.matmul(vis_fc2_relu, W_fc3, name='fc2') + b_fc3, name='fc2_relu')
+    image_out = tf.nn.sigmoid(tf.matmul(vis_fc2_relu, W_fc3, name='fc2') + b_fc3, name='fc2_relu')
 
 sess.run(tf.initialize_all_variables())
 
@@ -139,9 +138,9 @@ if os.path.isfile('model.ckpt'):
     saver.restore(sess, "model.ckpt")
     print("Loading previous network")
 
-e_lr = 2000
-m_lr = 5
-test_lr = 2000
+e_lr_init = 100
+m_lr = 1
+test_lr_init = 100
 e_step_size = 20
 m_step_size = 10000
 test_step_size = 100
@@ -157,7 +156,7 @@ def reinitialize():
 def test_network():
     data, label = test_batch = dataset.next_test_batch(batch_size)
     reinitialize()
-    test_lr = 200
+    test_lr = test_lr_init
     for e_iter in range(0, test_step_size):
         sess.run(e_step_test, feed_dict={x: data, y_ref: label,
                                          train_phase: [False]*batch_size, e_learning_rate: test_lr})
@@ -199,8 +198,8 @@ def visualize():
         for j in range(transform_dim):
             input_label[10 + j] = random.random() * (transform_var_ub[j] - transform_var_lb[j]) + transform_var_lb[j]
         vis_result = sess.run(image_out, feed_dict={y_vis: [input_label]})
-        vis_result = dataset.convert_to_rgb(vis_result[0, :])
-        plt.imshow(vis_result)
+        vis_result = dataset.convert_to_gray(vis_result[0, :])
+        plt.imshow(vis_result, cmap=plt.get_cmap('Greys'))
     plt.draw()
     plt.savefig('vis/image' + str(vis_index) + '.png')
     vis_index += 1
@@ -223,14 +222,15 @@ def visualize_all():
 
 transform_var_ub = np.zeros(transform_dim)
 transform_var_lb = np.zeros(transform_dim)
-batch_data, batch_label = dataset.next_batch(batch_size)
-for m_iter in range(m_step_size):
 
+# print(batch_label)
+for m_iter in range(m_step_size):
+    batch_data, batch_label = dataset.next_batch(batch_size)
     # if m_iter % 5 == 0:
     #     test_network()
     use_label = True
     reinitialize()
-    e_lr = 1000
+    e_lr = e_lr_init
     e_list = []
     for e_iter in range(0, e_step_size):
         res = sess.run([e_step, total_train_loss], feed_dict={x: batch_data, y_ref: batch_label, train_phase: [use_label]*batch_size, e_learning_rate: e_lr})
@@ -260,8 +260,8 @@ for m_iter in range(m_step_size):
     train_writer.add_summary(summary_str, m_iter)
     print("Iteration M: " + str(m_iter) + " with loss " + str(loss_result))
     train_writer.flush()
-    if m_iter % 10 == 0:
-        m_lr *= 0.95
+    if m_iter % 300 == 0:
+        m_lr *= 0.97
 
     if m_iter % 20 == 0 and e_step_size < 30:
         e_step_size += 1
