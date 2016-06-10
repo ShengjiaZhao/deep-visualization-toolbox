@@ -1,12 +1,12 @@
 __author__ = 'shengjia'
 
-from config import settings
+
 import numpy as np
 sys.path.insert(0, '..')
 from find_maxes.loaders import load_imagenet_mean, load_labels, caffe
 
 class ImageSearcher:
-    def __init__(self, net_prototxt, net_weights, settings=settings):
+    def __init__(self, net_prototxt, net_weights, settings):
         self.settings = settings
         self.layer = 'conv5'
         self.activation = np.load(settings['activation_root'] + self.layer + '.npy')[:80000]
