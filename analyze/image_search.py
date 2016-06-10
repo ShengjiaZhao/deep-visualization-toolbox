@@ -7,8 +7,9 @@ from find_maxes.loaders import load_imagenet_mean, load_labels, caffe
 
 class ImageSearcher:
     def __init__(self, net_prototxt, net_weights, settings=settings):
-        self.layer = 'fc6'
-        self.activation = np.load(settings['activation_root'] + self.layer + '.npy')
+        self.settings = settings
+        self.layer = 'conv5'
+        self.activation = np.load(settings['activation_root'] + self.layer + '.npy')[:80000]
         self.num_image = self.activation.shape[0]
 
         # Read in path for all the images
@@ -32,11 +33,11 @@ class ImageSearcher:
         order = np.argsort(np.sum(abs(diff_matrix), 1))
         result = []
         for i in range(0, num_hits):
-            result.append(settings['image_root'] + self.image_list[order[i]])
+            result.append(self.settings['image_root'] + self.image_list[order[i]])
         return result
 
     def get_path(self, index):
-        return settings['image_root'] + self.image_list[index]
+        return self.settings['image_root'] + self.image_list[index]
 
     def query_image(self, image_path, num_hits=10):
         im = caffe.io.load_image(image_path)
@@ -51,5 +52,5 @@ class ImageSearcher:
         order = np.argsort(np.sum(abs(diff_matrix), 1))
         result = []
         for i in range(0, num_hits):
-            result.append(settings['image_root'] + self.image_list[order[i]])
+            result.append(self.settings['image_root'] + self.image_list[order[i]])
         return result
