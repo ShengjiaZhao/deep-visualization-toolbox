@@ -10,7 +10,9 @@ CNN在很多识别任务中都有极好的表现，研究也说明，被训练�
 
 ## 实验
 Demo可以打开链接(http://52.53.218.78:8889/notebooks/ImageSearch.ipynb)运行．将
-```url=""```
+```
+url=""
+```
 这句里的url改成图片的网址，选择　Kernel->Restart and Run All　程序会下载该图片，并且检索近似的图片
 
 Demo开放至2016.6.15

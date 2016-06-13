@@ -22,6 +22,7 @@ class ImageSearcher:
             self.image_list.append(path.strip())
 
         imagenet_mean = load_imagenet_mean()
+        caffe.set_mode_cpu()
         self.net = caffe.Classifier(net_prototxt, net_weights,
                                     mean=imagenet_mean,
                                     channel_swap=(2,1,0),
