@@ -64,30 +64,21 @@ transform_dim = 2
 transform_var = state_variable([batch_size, transform_dim], name='transform_var')
 with tf.name_scope("fc1"):
     fc1_input = tf.concat(1, [tf.select(train_phase, y_ref, y_pred), transform_var])
-    W_fc1 = weight_variable([10+transform_dim, 7*7*32])
-    b_fc1 = bias_variable([7*7*32])
-    fc1_var = state_variable([batch_size, 7*7*32], name='fc1_var')
+    W_fc1 = weight_variable([10+transform_dim, 28*28*8])
+    b_fc1 = bias_variable([28*28*8])
+    fc1_var = state_variable([batch_size, 28*28*8], name='fc1_var')
 
     fc1_relu = tf.nn.relu(tf.matmul(fc1_input, W_fc1, name='fc1') + b_fc1, name='fc1_relu')
-    fc1_loss = tf.reduce_sum(tf.square(tf.sub(fc1_var, fc1_relu)), name='fc1_loss') / (7*7*32*batch_size)
-    fc1_reg = -tf.log(tf.reduce_sum(fc1_relu) / (7*7*32*batch_size) + 1)
-    fc1_weight_loss = tf.reduce_sum(tf.square(W_fc1)) / (10*7*7*32+transform_dim*7*7*32)
-
-with tf.name_scope('conv1'):
-    conv1_in = unpool(tf.reshape(fc1_var, [batch_size, 7, 7, 32]), name='conv1_unpool')
-    W_conv1 = weight_variable([5, 5, 32, 24])
-    b_conv1 = bias_variable([24])
-    conv1_var = state_variable([batch_size, 14, 14, 24], name='conv1_var')
-
-    conv1_relu = tf.nn.relu(tf.nn.conv2d(conv1_in, W_conv1, strides=[1, 1, 1, 1], padding='SAME') + b_conv1)
-    conv1_loss = tf.reduce_sum(tf.square(tf.sub(conv1_var, conv1_relu)), name='conv1_loss') / (14*14*24*batch_size)
+    fc1_loss = tf.reduce_sum(tf.square(tf.sub(fc1_var, fc1_relu)), name='fc1_loss') / (28*28*8*batch_size)
+    fc1_reg = -tf.log(tf.reduce_sum(fc1_relu) / (28*28*8*batch_size) + 1)
+    fc1_weight_loss = tf.reduce_sum(tf.square(W_fc1)) / (10*28*28*8+transform_dim*28*28*8)
 
 with tf.name_scope('conv2'):
-    conv2_in = unpool(conv1_var, name='conv2_unpool')
-    W_conv2 = weight_variable([5, 5, 24, 1])
+    conv2_in = tf.reshape(fc1_var, (batch_size, 28, 28, 8)) #unpool(conv1_var, name='conv2_unpool')
+    W_conv2 = weight_variable([5, 5, 8, 1])
     b_conv2 = bias_variable([1])
 
-    conv2_relu = tf.nn.sigmoid(tf.nn.conv2d(conv2_in, W_conv2, strides=[1, 1, 1, 1], padding='SAME') + b_conv2)
+    conv2_relu = tf.nn.sigmoid(tf.nn.conv2d(conv2_in, W_conv2, strides=[1, 1, 1, 1], padding='SAME'))
     conv2_loss = tf.reduce_sum(tf.square(tf.sub(x_image, conv2_relu)), name='conv2_loss') / (28*28*batch_size)
 
 # Some hints:
@@ -97,12 +88,12 @@ with tf.name_scope('conv2'):
 # TODO: Plot posterior activation for internal nodes
 
 
-total_train_loss = fc1_loss * 20 + conv1_loss + conv2_loss # + #conv1_loss + conv2_loss
-total_test_loss = fc1_loss * 100 + conv1_loss + conv2_loss
+total_train_loss = fc1_loss + conv2_loss # + #conv1_loss + conv2_loss
+total_test_loss = fc1_loss * 100 + conv2_loss
 
 with tf.name_scope('summary'):
     tf.scalar_summary('fc1_loss', fc1_loss)
-    tf.scalar_summary('fc2_loss', conv1_loss)
+    # tf.scalar_summary('fc2_loss', conv1_loss)
     tf.scalar_summary('fc3_loss', conv2_loss)
     tf.scalar_summary('total_loss', total_train_loss)
     # tf.scalar_summary('fc4_loss', fc4_loss)
@@ -122,15 +113,15 @@ with tf.name_scope('summary'):
 
 e_learning_rate = tf.placeholder(tf.float32, shape=[])
 e_step = tf.train.GradientDescentOptimizer(e_learning_rate).minimize(total_train_loss,
-                                                                     var_list=[fc1_var, conv1_var, transform_var],
+                                                                     var_list=[fc1_var, transform_var],
                                                                      name='E_optim')
 m_learning_rate = tf.placeholder(tf.float32, shape=[])
 m_step = tf.train.GradientDescentOptimizer(m_learning_rate).minimize(total_train_loss,
-                                           var_list=[W_fc1, b_fc1, W_conv1, b_conv1, W_conv2, b_conv2],
+                                           var_list=[W_fc1, b_fc1, W_conv2, b_conv2],
                                            name='M_optim')
 
 e_step_test = tf.train.GradientDescentOptimizer(e_learning_rate).minimize(total_test_loss,
-                                                                          var_list=[fc1_var, conv1_var, transform_var, y_weight_var],
+                                                                          var_list=[fc1_var, transform_var, y_weight_var],
                                                                           name='E_optim_test')
 summary_op = tf.merge_all_summaries()
 train_writer = tf.train.SummaryWriter('log/generative', sess.graph)
@@ -138,8 +129,8 @@ train_writer = tf.train.SummaryWriter('log/generative', sess.graph)
 y_vis = tf.placeholder(tf.float32, shape=[1, 12])
 with tf.name_scope("visualization"):
     vis_fc1_relu = tf.nn.relu(tf.matmul(y_vis, W_fc1) + b_fc1)
-    vis_conv1_relu = tf.nn.relu(tf.nn.conv2d(unpool(tf.reshape(vis_fc1_relu, (1, 7, 7, 32))), W_conv1, strides=[1, 1, 1, 1], padding='SAME') + b_conv1)
-    image_out = tf.nn.sigmoid(tf.nn.conv2d(unpool(vis_conv1_relu), W_conv2, strides=[1, 1, 1, 1], padding='SAME') + b_conv2)
+    # vis_conv1_relu = tf.nn.relu(tf.nn.conv2d(unpool(tf.reshape(vis_fc1_relu, (1, 7, 7, 32))), W_conv1, strides=[1, 1, 1, 1], padding='SAME') + b_conv1)
+    image_out = tf.nn.sigmoid(tf.nn.conv2d(tf.reshape(vis_fc1_relu, (1, 28, 28, 8)), W_conv2, strides=[1, 1, 1, 1], padding='SAME') + b_conv2)
 
 sess.run(tf.initialize_all_variables())
 
@@ -148,7 +139,7 @@ if os.path.isfile('model.ckpt'):
     saver.restore(sess, "model.ckpt")
     print("Loading previous network")
 
-e_lr_init = 600
+e_lr_init = 3000
 m_lr = 5
 test_lr_init = 800
 e_step_size = 30
@@ -158,7 +149,7 @@ test_step_size = 100
 
 def reinitialize():
     sess.run(fc1_var.initializer)
-    sess.run(conv1_var.initializer)
+    # sess.run(conv1_var.initializer)
     # sess.run(conv2_var.initializer)
     # sess.run(conv1_var.initializer)
     sess.run(y_weight_var.initializer)
@@ -231,11 +222,11 @@ def visualize_all():
         plt.show()
 
 def plot_conv1_activation():
-    activation = sess.run(conv1_var)
+    activation = np.reshape(sess.run(fc1_var), (batch_size, 28, 28, 8))
     plt.ioff()
-    for i in range(24):
-        plt.subplot(4, 6, i)
-        plt.imshow(activation[0, :, :, i], interpolation='none')
+    for i in range(8):
+        plt.subplot(3, 3, i)
+        plt.imshow(np.clip(activation[0, :, :, i], 0, 1), interpolation='none', cmap=plt.get_cmap('Greys'))
     plt.show()
     plt.ion()
 
@@ -250,19 +241,14 @@ for m_iter in range(m_step_size):
     e_lr = e_lr_init
     res = []
     for e_iter in range(0, e_step_size):
-        loss = sess.run([e_step, total_train_loss], feed_dict={x: batch[0], y_ref: batch[1], train_phase: [use_label]*batch_size, e_learning_rate: e_lr})[1]
+        loss = sess.run([e_step, conv2_loss], feed_dict={x: batch[0], y_ref: batch[1], train_phase: [use_label]*batch_size, e_learning_rate: e_lr})[1]
         if e_iter > 15:
             e_lr *= 0.8
         res.append(loss)
-        print(e_iter)
-    plot_conv1_activation()
-    plt.ioff()
-    plt.plot(res)
-    plt.yscale('log')
-    plt.show()
-    for i in range(24):
-        plt.imshow(sess.run(conv1_var)[0, :, :, i], cmap=plt.get_cmap('Greys'))
-        plt.show()
+    # plt.ioff()
+    # plt.plot(res)
+    # plt.show()
+    # plot_conv1_activation()
         # print(sess.run(fc1_var)[0, 0:10])
     transform_value = sess.run(transform_var)
     for b in range(batch_size):
