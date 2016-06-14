@@ -95,43 +95,7 @@ with tf.name_scope('conv2'):
 # 2. When the internal nodes become Gaussians with very small variance, does this mean that the network is almost exact
 # but still convex?
 # TODO: Plot posterior activation for internal nodes
-'''
-with tf.name_scope("fc1"):
-    fc1_input = tf.select(train_phase, y_ref, y_weight_var)
-    W_fc1 = weight_variable([10, 256])
-    b_fc1 = bias_variable([256])
-    fc1_var = state_variable([batch_size, 256], name='fc1_var')
 
-    fc1_relu = tf.nn.relu(tf.matmul(fc1_input, W_fc1, name='fc1') + b_fc1, name='fc1_relu')
-    fc1_loss = tf.reduce_sum(tf.square(tf.sub(fc1_var, fc1_relu)), name='fc1_loss') / (256*batch_size)
-
-with tf.name_scope("fc2"):
-    W_fc2 = weight_variable([256, 7 * 7 * 32])
-    b_fc2 = bias_variable([7 * 7 * 32])
-    fc2_var = state_variable([batch_size, 7 * 7 * 32], name='fc2_var')
-
-    fc2_relu = tf.nn.relu(tf.matmul(fc1_var, W_fc2, name='fc2') + b_fc2, name='fc2_relu')
-    fc2_loss = tf.reduce_sum(tf.square(tf.sub(fc2_var, fc2_relu)), name='fc2_loss') / (7*7*32*batch_size)
-'''
-'''
-with tf.name_scope('conv1'):
-    conv1_in = unpool(tf.reshape(fc2_var, [batch_size, 7, 7, 32]), name='conv1_unpool')
-    W_conv1 = weight_variable([5, 5, 32, 24])
-    b_conv1 = bias_variable([24])
-    conv1_var = state_variable([batch_size, 14, 14, 24], name='conv1_var')
-
-    conv1_relu = tf.nn.relu(tf.nn.conv2d(conv1_in, W_conv1, strides=[1, 1, 1, 1], padding='SAME') + b_conv1)
-    conv1_loss = tf.reduce_sum(tf.square(tf.sub(conv1_var, conv1_relu)), name='conv1_loss') / (14*14*24*batch_size)
-
-with tf.name_scope('conv2'):
-    conv2_in = unpool(conv1_var, name='conv2_unpool')
-    W_conv2 = weight_variable([5, 5, 24, 1])
-    b_conv2 = bias_variable([1])
-    x_image = tf.reshape(x, [-1, 28, 28, 1])
-
-    conv2_relu = tf.nn.relu(tf.nn.conv2d(conv2_in, W_conv2, strides=[1, 1, 1, 1], padding='SAME') + b_conv2)
-    conv2_loss = tf.reduce_sum(tf.square(tf.sub(x_image, conv2_relu)), name='conv2_loss') / (28*28*batch_size)
-'''
 
 total_train_loss = fc1_loss * 20 + conv1_loss + conv2_loss # + #conv1_loss + conv2_loss
 total_test_loss = fc1_loss * 100 + conv1_loss + conv2_loss
@@ -266,6 +230,15 @@ def visualize_all():
         plt.imshow(canvas, cmap=plt.get_cmap('Greys'))
         plt.show()
 
+def plot_conv1_activation():
+    activation = sess.run(conv1_var)
+    plt.ioff()
+    for i in range(24):
+        plt.subplot(4, 6, i)
+        plt.imshow(activation[0, :, :, i], interpolation='none')
+    plt.show()
+    plt.ion()
+
 transform_var_ub = np.zeros(2)
 transform_var_lb = np.zeros(2)
 for m_iter in range(m_step_size):
@@ -282,6 +255,7 @@ for m_iter in range(m_step_size):
             e_lr *= 0.8
         res.append(loss)
         print(e_iter)
+    plot_conv1_activation()
     plt.ioff()
     plt.plot(res)
     plt.yscale('log')
