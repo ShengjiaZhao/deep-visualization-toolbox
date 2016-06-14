@@ -37,6 +37,7 @@ class ImageSearcher:
             index = np.argsort(np.sum(abs(diff_matrix), 1))[:num_hits]
         else:
             dist, index = self.ball_tree.query(query, k=num_hits)
+            print(dist, index)
         result = []
         for i in range(0, num_hits):
             result.append(self.settings['image_root'] + self.image_list[index[i]])
