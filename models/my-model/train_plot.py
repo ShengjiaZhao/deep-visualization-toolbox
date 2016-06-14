@@ -42,3 +42,23 @@ def running_avg(seq, smooth=0.9):
         new_seq.append(sum)
     return new_seq
 
+
+def extract_info_sigmoid(filename):
+    reader = open(filename)
+    iteration_seq = []
+    accuracy_seq = []
+    sigmoid_seq = []
+    while True:
+        line = reader.readline().split()
+        if len(line) == 0:
+            break
+        iteration = float(line[2])
+        accuracy = float(line[3])
+        sigmoid = float(line[5])
+        iteration_seq.append(iteration)
+        accuracy_seq.append(accuracy)
+        sigmoid_seq.append(sigmoid)
+
+    return {'iter': iteration_seq,
+            'accuracy': accuracy_seq,
+            'sigmoid': sigmoid_seq}

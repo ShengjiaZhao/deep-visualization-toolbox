@@ -230,7 +230,7 @@ layer {
   reduction_param {
     operation: MEAN
   }
-  loss_weight: 1.0
+  loss_weight: 3.0
 }
 layer {
   name: "conv4"
@@ -299,7 +299,7 @@ layer {
   reduction_param {
     operation: MEAN
   }
-  loss_weight: 1.0
+  loss_weight: 3.0
 }
 layer {
   name: "conv5"
@@ -368,7 +368,7 @@ layer {
   reduction_param {
     operation: MEAN
   }
-  loss_weight: 1.0
+  loss_weight: 5.0
 }
 layer {
   name: "pool5"
