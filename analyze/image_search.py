@@ -1,6 +1,6 @@
 __author__ = 'shengjia'
 
-
+import sys
 import numpy as np
 sys.path.insert(0, '..')
 from find_maxes.loaders import load_imagenet_mean, load_labels, caffe
