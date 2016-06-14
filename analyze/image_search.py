@@ -2,6 +2,7 @@ __author__ = 'shengjia'
 
 import sys
 import numpy as np
+import time
 sys.path.insert(0, '..')
 from find_maxes.loaders import load_imagenet_mean, load_labels, caffe
 from sklearn.neighbors import BallTree
@@ -48,6 +49,7 @@ class ImageSearcher:
         return self.query(self.activation[query_index, :], num_hits)
 
     def query_image(self, image_path, num_hits=10):
+        start_time = time.time()
         im = caffe.io.load_image(image_path)
         self.net.predict([im], oversample=False)   # Just take center crop
         layer_shape = self.net.blobs[self.layer].data.shape
@@ -55,8 +57,11 @@ class ImageSearcher:
             result_array = np.amax(self.net.blobs[self.layer].data, (0, 2, 3))
         else:
             result_array = np.amax(self.net.blobs[self.layer].data, 0)
-
-        return self.query(result_array, num_hits)
+        caffe_time = time.time() - start_time
+        start_time = time.time()
+        result = self.query(result_array, num_hits)
+        query_time = time.time() - start_time
+        return result, caffe_time, query_time
 
     def use_ball_tree(self):
         """Call this function to enable and initialize ball tree speed up"""
